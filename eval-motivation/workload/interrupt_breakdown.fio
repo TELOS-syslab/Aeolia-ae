@@ -1,0 +1,11 @@
+[global]
+ioengine=io_uring
+iodepth=1
+direct=1
+[breakdown]
+rw=randread
+cpus_allowed=92
+filename=/dev/nvme0n1
+bs=4k
+size=80k
+numjobs=1

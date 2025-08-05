@@ -1,0 +1,22 @@
+CompileFlags:
+  Remove:
+    - -mpreferred-stack-boundary=3
+    - -mindirect-branch=thunk-extern
+    - -mindirect-branch-register
+    - -mindirect-branch-cs-prefix
+    - -mrecord-mcount
+    - -mfunction-return=thunk-extern
+    - -fconserve-stack
+    - -fno-allow-store-data-races
+    - -fsanitize=bounds-strict
+  Add:
+    - -I/usr/lib/gcc/x86_64-linux-gnu/11/include
+    - -I/usr/include
+    - -I/usr/include/x86_64-linux-gnu/
+
+# ignore builtin_definition
+
+Diagnostics:
+  Suppress: 
+   - "builtin_definition" 
+   - -Winterrupt-service-routine"

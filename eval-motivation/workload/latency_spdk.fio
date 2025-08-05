@@ -1,0 +1,13 @@
+[global]
+ioengine=spdk
+iodepth=1
+direct=1
+[breakdown]
+rw=randread
+cpus_allowed=92
+bs=4k
+time_based
+runtime=5s
+numjobs=1
+thread=1
+percentile_list=50
