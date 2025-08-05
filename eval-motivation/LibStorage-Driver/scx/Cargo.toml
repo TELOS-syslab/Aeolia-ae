@@ -1,0 +1,29 @@
+[workspace]
+members = ["rust/scx_stats",
+           "rust/scx_stats/scx_stats_derive",
+	   "rust/scx_utils",
+           "rust/scx_rustland_core",
+           "tools/scxtop",
+           "rust/scx_loader",
+	   "scheds/rust/scx_lavd",
+           "scheds/rust/scx_bpfland",
+           "scheds/rust/scx_flash",
+           "scheds/rust/scx_rustland",
+           "scheds/rust/scx_rlfifo",
+           "scheds/rust/scx_rusty",
+           "scheds/rust/scx_p2dq",
+           "scheds/rust/scx_tickless",
+           "scheds/rust/scx_layered",
+           "scheds/rust/scx_mitosis"]
+resolver = "2"
+
+[profile.release]
+lto = true
+
+[profile.release-fast]
+inherits = "release"
+target-cpu = "native"
+lto = false
+incremental = true
+opt-level = 0
+debuginfo = 0

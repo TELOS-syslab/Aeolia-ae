@@ -1,0 +1,12 @@
+export INTUS_NVME_SSD="/dev/nvme0n1"
+export INTUS_NVME_PCIE_ADDR="0000:c8:00.0"
+export INTUS_NVME_TR_ADDR="0000.c8.00.0"
+export INTUS_TSK_SET="110-115"
+export INTUS_ROOT_DIR="$(realpath .)"
+export INTUS_RSLT_DIR="$INTUS_ROOT_DIR"/results
+export INTUS_DATA_DIR="$INTUS_ROOT_DIR"/data
+export INTUS_PLOT_DIR="$INTUS_ROOT_DIR"/plot
+export INTUS_SPDK_DIR="$INTUS_ROOT_DIR"/spdk
+export INTUS_FIO_ENGINE="$INTUS_ROOT_DIR"/apps/fio-plugin/ls_fio
+export INTUS_FIO_ENGINE_NAME="libstorage"
+export INTUS_LIBSCHED="$INTUS_ROOT_DIR"/scx/build/scheds/c/scx_eevdf

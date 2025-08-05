@@ -1,0 +1,38 @@
+[package]
+name = "scx_layered"
+version = "1.0.11"
+authors = ["Tejun Heo <htejun@meta.com>", "Meta"]
+edition = "2021"
+description = "A highly configurable multi-layer BPF / user space hybrid scheduler used within sched_ext, which is a Linux kernel feature which enables implementing kernel thread schedulers in BPF and dynamically loading them. https://github.com/sched-ext/scx/tree/main"
+license = "GPL-2.0-only"
+
+[dependencies]
+anyhow = "1.0.65"
+bitvec = "1.0"
+chrono = "0.4"
+clap = { version = "4.1", features = ["derive", "env", "unicode", "wrap_help"] }
+crossbeam = "0.8.4"
+ctrlc = { version = "3.1", features = ["termination"] }
+fastrand = "2.1.1"
+fb_procfs = "0.7"
+lazy_static = "1.5.0"
+libbpf-rs = "=0.25.0-beta.1"
+libc = "0.2.137"
+log = "0.4.17"
+scx_stats = { path = "../../../rust/scx_stats", version = "1.0.10" }
+scx_stats_derive = { path = "../../../rust/scx_stats/scx_stats_derive", version = "1.0.10" }
+scx_utils = { path = "../../../rust/scx_utils", version = "1.0.12" }
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
+simplelog = "0.12"
+once_cell = "1.20.2"
+
+[build-dependencies]
+scx_utils = { path = "../../../rust/scx_utils", version = "1.0.12" }
+
+[features]
+enable_backtrace = []
+
+[package.metadata.appimage]
+auto_link = true
+

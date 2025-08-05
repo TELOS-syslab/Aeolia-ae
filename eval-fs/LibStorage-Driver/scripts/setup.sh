@@ -11,9 +11,9 @@ reset_hugepages() {
 
     # echo "Setting HugePages to 2048..."
     # echo 65536 > /proc/sys/vm/nr_hugepages
-    echo 32768 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages 
-    echo 32768 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages 
-    echo 32768 > /sys/devices/system/node/node2/hugepages/hugepages-2048kB/nr_hugepages 
+    echo 65536 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages 
+    echo 65536 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages 
+    echo 65536 > /sys/devices/system/node/node2/hugepages/hugepages-2048kB/nr_hugepages 
     # echo 16384 > /proc/sys/vm/nr_hugepages
     echo "Removing /mnt/libstorage_huge directory..."
     rm -rf /mnt/libstorage_huge

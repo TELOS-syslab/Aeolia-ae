@@ -1,0 +1,28 @@
+
+# Compiled Binaries
+
+*.o
+*.ko
+*.so
+*.mod
+*.mod.*
+*.cmd
+*.d
+*.cmd
+*.order
+*.symvers
+*.log
+.cache/
+.gdb_history
+*.json
+# Clangd
+
+apps/**/*.fio
+apps/**/*.sh
+ls_fio
+test_app
+
+data
+results
+plot
+__pycache__

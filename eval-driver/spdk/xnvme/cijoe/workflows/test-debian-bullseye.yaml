@@ -1,0 +1,36 @@
+---
+doc: |
+  Test xNVMe on Linux
+
+steps:
+- name: sysinfo
+  uses: linux.sysinfo
+
+- name: hugetlbfs
+  uses: gha_prepare_hugetlbfs
+
+- name: test_python
+  uses: core.testrunner
+  with:
+    args: '{{ config.xnvme.source.path }}/python/tests -k "not fabrics and not vfio"'
+    run_local: false
+
+- name: test_ramdisk
+  uses: core.testrunner
+  with:
+    args: '-k "ramdisk" tests'
+
+- name: test_os
+  uses: core.testrunner
+  with:
+    args: '-k "(not ramdisk) and (not pcie) and (not fabrics)" tests'
+
+- name: test_pcie
+  uses: core.testrunner
+  with:
+    args: '-k "pcie" tests'
+
+- name: test_fabrics
+  uses: core.testrunner
+  with:
+    args: '-k "fabrics and not ioworker" tests'

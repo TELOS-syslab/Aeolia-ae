@@ -20,7 +20,7 @@ make_ext4_fio() {
 
 initialize_aeolia() {
     echo "Initializing Aeolia filesystem..."
-    sudo make
+    sudo make clean && sudo make
 }
 
 initialize_ext4() {
@@ -66,7 +66,7 @@ evaluate_aeolia() {
             for core in "${cores[@]}"; do
                 echo "Running aeolia test: $test $type $core"
                 initialize_aeolia
-                sudo ./fio-3.32/fio --name=test --ioengine=sync --rw=$type --bs=$test --thread=1 --numjobs=$core --size=512M --runtime=5s --time_based --output=./temp/aeolia_${test}_${type}_${core}.json --directory=/sufs/ --output-format=json --cpus_allowed=1-64 --cpus_allowed_policy=split
+                sudo ./fio-3.32/fio --name=test --ioengine=sync --rw=$type --bs=$test --thread=1 --numjobs=$core --size=512M --runtime=5s --time_based --output=./temp/aeolia_${test}_${type}_${core}.json --directory=/sufs --output-format=json --invalidate=0 --cpus_allowed=1-64 --cpus_allowed_policy=split
                 sudo sed -i '/^fio:/d' ./temp/aeolia_${test}_${type}_${core}.json
                 TP=$(jq '.jobs[0].'"${type}"'.bw_mean' ./temp/aeolia_${test}_${type}_${core}.json)
                 echo "aeolia, $core, $TP" >> data/fio_multi_${test}_${type}.csv

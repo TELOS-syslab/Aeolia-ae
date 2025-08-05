@@ -1,0 +1,22 @@
+option('with-libaio', type: 'feature', value: 'auto')
+option('with-liburing', type: 'feature', value: 'auto')
+option('with-libvfn', type: 'feature', value: 'auto')
+option('with-spdk', type: 'boolean', value: true)
+
+option('be_ramdisk', type: 'boolean', value: true)
+
+option('cbi_admin_shim', type: 'boolean', value: true)
+option('cbi_async_emu', type: 'boolean', value: true)
+option('cbi_async_nil', type: 'boolean', value: true)
+option('cbi_async_posix', type: 'boolean', value: true)
+option('cbi_async_thrpool', type: 'boolean', value: true)
+option('cbi_mem_posix', type: 'boolean', value: true)
+option('cbi_sync_psync', type: 'boolean', value: true)
+
+option('examples', type: 'boolean', value: true)
+option('tests', type: 'boolean', value: true)
+option('tools', type: 'boolean', value: true)
+
+option('build_subprojects', type : 'boolean', value : true, yield : true)
+
+option('force_completions', type: 'boolean', value: false, description: 'Install bash-completions at the default location if bash-completion is not available on the system')

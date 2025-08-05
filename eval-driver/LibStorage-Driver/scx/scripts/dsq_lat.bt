@@ -1,0 +1,85 @@
+#!/usr/bin/env bpftrace
+// Copyright (c) Meta Platforms, Inc. and affiliates.
+
+// This software may be used and distributed according to the terms of the
+// GNU General Public License version 2.
+
+/*
+ * dsq_lat.bt - Observe DSQ latencies
+ *
+ * Prints an average and histogram of DSQ latencies by timestamping from when a
+ * task is enqueued to a DSQ to when a task is running.
+ *
+ * PIDs can be filtered by passing a parameter to dsq_lat.bt (0 for all pids):
+ *
+ * # filter PID 1234
+ * $ ./dsq_lat.bt 1234
+ *
+ * DSQs can be filtered by passing a second parameter:
+ *
+ * # filter DSQ 789
+ * $ ./dsq_lat.bt 0 789
+ *
+ */
+
+kprobe:scx_bpf_dsq_insert,
+kprobe:scx_bpf_dispatch,
+kprobe:scx_bpf_dsq_insert_vtime,
+kprobe:scx_bpf_dispatch_vtime,
+{
+	$task = (struct task_struct *)arg0;
+	$dsq = arg1;
+
+	if ($1 > 0 && $task->tgid != (int32) $1) {
+		return;
+	}
+	if ($2 >= 0 && $2 != $dsq && $# == 2) {
+		return;
+	}
+
+	if ($dsq >= 0) {
+		@qtime[$task->pid] = nsecs;
+		@task_dsq[$task->pid] = $dsq;
+	}
+}
+
+rawtracepoint:sched_switch
+{
+	$prev = (struct task_struct *)arg1;
+	$next = (struct task_struct *)arg2;
+	$prev_state = arg3;
+
+	if ($1 > 0 && $next->tgid != (int32) $1) {
+		return;
+	}
+
+	$start = @qtime[$next->pid];
+	$dsq = @task_dsq[$next->pid];
+	if ($2 >= 0 && $2 != $dsq && $# == 2) {
+		delete(@qtime[$next->pid]);
+		delete(@task_dsq[$next->pid]);
+		return;
+	}
+
+	if ($start && $dsq >= 0 && $dsq < (uint64) 2<<16) {
+		$dur = nsecs - $start;
+		$usec = $dur / 1000;
+		@lat_avg_usec[$dsq] = avg($usec);
+		@dsq_hist_usec[$dsq] = hist($usec);
+		@dsq_lat_avg_usec[$dsq] = avg($usec);
+	}
+	delete(@qtime[$next->pid]);
+	delete(@task_dsq[$next->pid]);
+}
+
+interval:s:1 {
+	print("------------------------------");
+	print(@lat_avg_usec);
+	print(@dsq_hist_usec);
+	print(@dsq_lat_avg_usec);
+}
+
+END {
+	clear(@task_dsq);
+	clear(@qtime);
+}

@@ -20,7 +20,7 @@ make_ext4_fxmark() {
 
 initialize_aeolia() {
     echo "Initializing Aeolia filesystem..."
-    sudo make
+        sudo make clean && sudo make
 }
 
 initialize_ext4() {

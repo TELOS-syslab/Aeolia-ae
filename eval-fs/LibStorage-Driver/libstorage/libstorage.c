@@ -95,7 +95,7 @@ static int create_dma_for_nvme(ls_nvme_dev *nvme, int instance_id)
 	if(instance_id == 1){
 		pool_size = DMA_PER_DEVICE * HUGE_PAGE_SIZE * 34;
 	} else {
-		pool_size = DMA_PER_DEVICE * HUGE_PAGE_SIZE * 2;
+		pool_size = DMA_PER_DEVICE * HUGE_PAGE_SIZE * 4;
 	}	
 	ret = create_dma_pool(nvme->dma_pool, pool_size,
 			      instance_id);

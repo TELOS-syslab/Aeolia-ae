@@ -8,7 +8,7 @@ cpus_allowed=92
 filename=/dev/nvme0n1
 bs=4k
 time_based
-runtime=5s
+runtime=5
 numjobs=1
 percentile_list=50
 sqthread_poll

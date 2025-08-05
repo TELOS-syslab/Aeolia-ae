@@ -1,0 +1,21 @@
+[submodule "dpdk"]
+	path = dpdk
+	url = git@github.com:spdk/dpdk.git
+[submodule "intel-ipsec-mb"]
+	path = intel-ipsec-mb
+	url = git@github.com:spdk/intel-ipsec-mb.git
+[submodule "isa-l"]
+	path = isa-l
+	url = git@github.com:spdk/isa-l.git
+[submodule "ocf"]
+	path = ocf
+	url = git@github.com:Open-CAS/ocf.git
+[submodule "libvfio-user"]
+	path = libvfio-user
+	url = git@github.com:nutanix/libvfio-user.git
+[submodule "xnvme"]
+	path = xnvme
+	url = git@github.com:xnvme/xnvme.git
+[submodule "isa-l-crypto"]
+	path = isa-l-crypto
+	url = git@github.com:intel/isa-l_crypto

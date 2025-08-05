@@ -1,0 +1,57 @@
+#!/usr/bin/env bpftrace
+// Copyright (c) Meta Platforms, Inc. and affiliates.
+
+// This software may be used and distributed according to the terms of the
+// GNU General Public License version 2.
+
+
+/*
+ * vtime_dist - Show the distribution of the change in vtime
+ *
+ * This script is used to probe scx_bpf_dispatch_vtime and prints the
+ * distribution of the difference in the vtime parameter The values are
+ * aggregated by dsq id.
+ *
+ * Processes can be filtered by passing a pid as the first parameter (0 for
+ * all pids):
+ *
+ * # filter pid 1234
+ * $ ./dsq_lat.bt 1234
+ * # all pids (default)
+ * $ ./dsq_lat.bt 0
+ *
+ * DSQs (above 0) can be filtered by passing the dsq id as the second parameter:
+ *
+ * # filter dsq 1234
+ * $ ./dsq_lat.bt 0 1234
+ */
+
+kprobe:scx_bpf_dsq_insert_vtime,
+kprobe:scx_bpf_dispatch_vtime,
+{
+	$task = (struct task_struct *)arg0;
+	$dsq = arg1;
+	$vtime = arg3;
+
+	if ($1 > 0 && $task->tgid != $1) {
+		return;
+	}
+	if ($2 > 0 && $2 != $dsq) {
+		return;
+	}
+
+	if ($dsq >= 0) {
+		$prev_vtime = @dsq_vtime_now[$dsq];
+		@dsq_vtime_prev[$dsq] = $prev_vtime;
+		@dsq_vtime_now[$dsq] = $vtime;
+		@dsq_vtime_diff[$dsq] = avg($vtime - $prev_vtime);
+		@dsq_vtime[$dsq] = hist($vtime - $prev_vtime);
+	}
+}
+
+
+interval:s:1 {
+	print("-----------------------------------");
+	print(@dsq_vtime);
+	print(@dsq_vtime_diff);
+}

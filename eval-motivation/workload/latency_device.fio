@@ -7,8 +7,7 @@ rw=randread
 cpus_allowed=92
 filename=/dev/nvme0
 bs=4k
-time_based
-runtime=5s
+size=80k
 numjobs=1
 percentile_list=50
 thread=1

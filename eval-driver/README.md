@@ -6,23 +6,14 @@ You need to change kernel during the ae.
 
 ## Enviroment prepration
 
-1. Clone this repo and checkout to ae branch first :
+1. Clone this repo first :
 
 ```sh
-git clone https://github.com/TELOS-syslab/LS.git
-cd LS && git checkout ae
+git clone git@github.com:TELOS-syslab/LS.git Aeolia-ae
+cd Aeolia-ae/eval-driver
 export LOCAL_AE_DIR=$(pwd)
 echo "LOCAL_AE_DIR=$(pwd)" >> ~/.bashrc
 # change bashrc to other profiles you use.
-```
-
-2. Clone the aeolia kernel, fio and spdk then:
-
-```sh
-git clone git@github.com:TELOS-syslab/intus-kernel.git 
-git clone git@github.com:TELOS-syslab/aeolia_fio.git fio
-git clone git@github.com:spdk/spdk.git
-git clone git@github.com:TELOS-syslab/LibStorage-Driver.git
 ```
 
 ## Driver evaluation
@@ -30,18 +21,14 @@ git clone git@github.com:TELOS-syslab/LibStorage-Driver.git
 ### 1. Preliminary
 
 ```sh
-cd ${LOCAL_AE_DIR}/fio && git checkout master # this is the original fio 3.38
+cd ${LOCAL_AE_DIR}/fio
 ./configure
 make -j$(nproc)
 
-cd ${LOCAL_AE_DIR}/spdk && git checkout v24.09
+cd ${LOCAL_AE_DIR}/spdk
 sudo ./scripts/pkgdep.sh
-git submodule update --init
 ./configure --with-fio=${LOCAL_AE_DIR}/fio
 make -j$(nproc)
-
-cd ${LOCAL_AE_DIR}/LibStorage-Driver && git checkout eval
-git submodule init tools/meson && git submodule update tools/meson
 
 ```
 
@@ -59,7 +46,7 @@ Also revise the spdk root directory in scripts/env.sh.
 revert to the origin 6.12 kernel
 
 ```sh
-cd ${LOCAL_AE_DIR}/intus-kernel && git checkout orig_6.12
+cd ${LOCAL_AE_DIR}/aeolia-kernel-orig-6.12
 sudo make -j$(nproc)
 sudo make modules_install -j$(nproc)
 sudo make install
@@ -76,8 +63,8 @@ sudo -E python scripts/execute.py -b
 
 Change kernel to Aeolia Kernel
 ```sh
-cd ${LOCAL_AE_DIR}/intus-kernel && git checkout main
-sudo make menucofing  # please enable UINTR on the main menu, it's called User Interrupts (UINTR)
+cd ${LOCAL_AE_DIR}/aeolia-kernel-uintr
+sudo make menuconfig  # please enable UINTR on the main menu, it's called User Interrupts (UINTR)
                       # alos enable SCHED_CLASS_EXT (location: General setup -> Extensible Scheduling Class)
 sudo make -j$(nproc)
 sudo make modules_install -j$(nproc)
@@ -87,7 +74,7 @@ sudo make install
 
 # after reboot, then
 
-cd ${LOCAL_AE_DIR}/LibStorage-Driver && git checkout eval
+cd ${LOCAL_AE_DIR}/LibStorage-Driver
 source scripts/env.sh
 bash scripts/setup.sh
 sudo -E python scripts/execute.py

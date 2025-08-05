@@ -12,7 +12,7 @@ make_filebench() {
 
 initialize_aeolia() {
     echo "Initializing Aeolia filesystem..."
-    sudo make
+    sudo make clean && sudo make
 }
 
 initialize_ext4() {

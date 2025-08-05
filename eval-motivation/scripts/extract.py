@@ -22,7 +22,7 @@ def process_line(line):
     metrics = [int(x) for x in metrics_str.split()]
     
     # Check if we have enough data (should be 10 values)
-    if len(metrics) != 10:
+    if len(metrics) != 17:
         return None
     
     # Check if any required metric is 0
@@ -36,10 +36,12 @@ def process_line(line):
     device_interrupt_time = tsc_to_ns(metrics[3] - metrics[1])
     io_complete = tsc_to_ns(metrics[4] - metrics[3])
     wakeup_time = tsc_to_ns(metrics[5] - metrics[4])
-    update_stat = tsc_to_ns(metrics[7] - metrics[6])
+    update_stat = tsc_to_ns(metrics[7] - metrics[16])
     schedule_context_switch = tsc_to_ns(metrics[8] - metrics[7])
     iou_callback = tsc_to_ns(metrics[9] - metrics[8])
     
+    k_io_submit = tsc_to_ns(metrics[13] - metrics[0])
+    k_io_complete = tsc_to_ns(metrics[4] - metrics[14])
     return {
         'io_submit': io_submit,
         'cs_to_idle': cs_to_idle,
@@ -48,12 +50,14 @@ def process_line(line):
         'wakeup_time': wakeup_time,
         'update_stat': update_stat,
         'schedule_context_switch': schedule_context_switch,
-        'iou_callback': iou_callback
+        'iou_callback': iou_callback,
+        'k_overhead_submit': k_io_submit,
+        'k_overhead_complete': k_io_complete
     }
 
 def process_device_latency(line):
     """Process a single line of RECORD DEVICE LATENCY data"""
-    match = re.search(r'RECORD DEVICE LATENCY : (\d+)', line)
+    match = re.search(r'\[RECORD DEVICE LATENCY\] : (\d+)', line)
     if not match:
         return None
     
@@ -99,18 +103,21 @@ def main():
                         print(f"  Update Stat.: {result['update_stat']:.2f} ns")
                         print(f"  Schedule + Context Switch: {result['schedule_context_switch']:.2f} ns")
                         print(f"  IOU Callback: {result['iou_callback']:.2f} ns")
+                        print(f"  K Overhead Submit: {result['k_overhead_submit']:.2f} ns")
+                        print(f"  K Overhead Complete: {result['k_overhead_complete']:.2f} ns")
                         print()
                     else:
-                        print(f"Line {line_num}: Invalid data (contains 0 values), skipped")
-                        print()
+                        # print(f"Line {line_num}: Invalid data (contains 0 values), skipped")
+                        # print()
+                        pass
                 
                 # Process RECORD DEVICE LATENCY data
                 elif 'RECORD DEVICE LATENCY' in line:
                     device_latency = process_device_latency(line)
                     if device_latency is not None:
                         device_latency_values.append(device_latency)
-                        print(f"Line {line_num}: Device Latency: {device_latency:.2f} ns")
-                        print()
+                        # print(f"Line {line_num}: Device Latency: {device_latency:.2f} ns")
+                        # print()
     
     except FileNotFoundError:
         print(f"Error: File '{input_file}' not found")
@@ -126,8 +133,8 @@ def main():
     # Calculate P50 medians for BREAKDOWN_METRICS
     if valid_results:
         num_valid = len(valid_results)
-        print(f"Total valid BREAKDOWN_METRICS lines: {num_valid}")
-        print("\nBREAKDOWN_METRICS P50 Medians:")
+        # print(f"Total valid BREAKDOWN_METRICS lines: {num_valid}")
+        # print("\nBREAKDOWN_METRICS P50 Medians:")
         
         # Extract all values for each metric
         io_submit_values = [r['io_submit'] for r in valid_results]
@@ -138,6 +145,8 @@ def main():
         update_stat_values = [r['update_stat'] for r in valid_results]
         schedule_context_switch_values = [r['schedule_context_switch'] for r in valid_results]
         iou_callback_values = [r['iou_callback'] for r in valid_results]
+        k_io_complete_values = [r['k_overhead_complete'] for r in valid_results]
+        k_io_submit_values = [r['k_overhead_submit'] for r in valid_results]
         
         median_io_submit = get_median(io_submit_values)
         median_cs_to_idle = get_median(cs_to_idle_values)
@@ -147,24 +156,40 @@ def main():
         median_update_stat = get_median(update_stat_values)
         median_schedule_context_switch = get_median(schedule_context_switch_values)
         median_iou_callback = get_median(iou_callback_values)
-        
-        print(f"  IO Submit: {median_io_submit:.2f} ns")
-        print(f"  CS to Idle: {median_cs_to_idle:.2f} ns")
-        print(f"  Device Time + Interrupt Time: {median_device_interrupt_time:.2f} ns")
-        print(f"  IO Complete: {median_io_complete:.2f} ns")
-        print(f"  Wakeup time: {median_wakeup_time:.2f} ns")
-        print(f"  Update Stat.: {median_update_stat:.2f} ns")
-        print(f"  Schedule + Context Switch: {median_schedule_context_switch:.2f} ns")
-        print(f"  IOU Callback: {median_iou_callback:.2f} ns")
+        median_k_io_complete = get_median(k_io_complete_values)
+        median_k_io_submit = get_median(k_io_submit_values)
     
     # Calculate P50 median for device latency
     if device_latency_values:
         num_device_latency = len(device_latency_values)
-        print(f"\nTotal valid RECORD DEVICE LATENCY lines: {num_device_latency}")
-        print("\nDevice Latency P50 Median:")
+        # print(f"\nTotal valid RECORD DEVICE LATENCY lines: {num_device_latency}")
+        # print("\nDevice Latency P50 Median:")
         
         median_device_latency = get_median(device_latency_values)
-        print(f"  Device Latency: {median_device_latency:.2f} ns")
+    
+    ## Fig3
+    with open("fig/fig3_data.csv", "w") as f:
+        f.write("IO Submit, CS to Idle, Device, Interrupt, IO Complete, Wake Up, Update Stat., Schedule, IOU Callback\n")
+        f.write(f"{median_io_submit-median_k_io_submit}, {median_cs_to_idle}, {median_device_latency}, {median_device_interrupt_time - median_device_latency}, {median_io_complete - median_k_io_complete}, {median_wakeup_time}, {median_update_stat}, {median_schedule_context_switch}, {median_iou_callback}")
+    
+    with open("data/dev_lat.log", "w") as f:
+        f.write(f"{median_device_latency}")
+
+    total = median_io_submit + median_device_interrupt_time + median_io_complete + median_wakeup_time + median_update_stat + median_schedule_context_switch + median_iou_callback
+    
+    with open("data/latency.csv", "r") as f:
+        io_uring_dft = None
+        for line in f:
+            line = line.strip()
+            if line.startswith("iou_dfl"):
+                parts = line.split(",")
+                iou_dft = int(parts[1].strip())
+        if io_uring_dft is None:
+            io_uring_dft = 0
+    with open("data/iou_breakdown.csv", "w") as f:
+        f.write("others, scheduling, interrupt, k_overhead, processing, device\n")
+        f.write(f"{iou_dft - total}, {median_schedule_context_switch+median_update_stat+median_wakeup_time}, {median_device_interrupt_time-median_device_latency}, {median_k_io_complete+median_k_io_submit}, {median_io_complete - median_k_io_complete + median_io_submit-median_k_io_submit}, {median_device_latency}")
+
 
 if __name__ == "__main__":
     main()

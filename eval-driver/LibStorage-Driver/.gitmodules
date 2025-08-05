@@ -1,0 +1,12 @@
+[submodule "tools/meson"]
+	path = tools/meson
+	url = https://github.com/mesonbuild/meson.git
+[submodule "tools/llvm"]
+	path = tools/llvm
+	url = git@github.com:llvm/llvm-project.git
+[submodule "spdk"]
+	path = spdk
+	url = git@github.com:spdk/spdk.git
+[submodule "tools/libbpf"]
+	path = tools/libbpf
+	url = git@github.com:libbpf/libbpf.git

@@ -1,36 +1,49 @@
 # Aeolia FS Artifact Evaluation
 
 ## 1. Evaluate single thread performance
+Build the kernel
+
+```sh
+cd aeolia-kernel-uintr
+cp /boot/config-$(uname -r) ./.config
+sudo make olddefconfig
+
+# please enable UINTR on the main menu, it's called User Interrupts (UINTR)
+sudo make menuconfig
+sudo make -j$(nproc)
+sudo make modules_install -j$(nproc)
+sudo make install
+```
 
 ```sh
 # build the aeolia system under kernel w/ uintr
-sudo sh figure14.sh
+sudo ./figure14.sh
 
 ```
 
 ## 2. Evaluate multi-thread performance
 
 ```sh
-sudo sh figure15.sh
+sudo ./figure15.sh
 ```
 
 ## 3. Evaluate metadata scalability (fxmark)
 
 ```sh
-sudo sh figure16.sh
+sudo ./figure16.sh
 
 ```
 
 ## 4. Evaluate filebench
 
 ```sh
-sudo sh figure18.sh
+sudo ./figure18.sh
 ```
 
 ## 5. Evaluate Real-worlds (leveldb)
 
 ```sh
-sudo sh table7.sh
+sudo ./table7.sh
 ```
 
 ## 6. Data Cleaning & Figure

@@ -6,6 +6,8 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
+set -x
+
 sudo ${LOCAL_AE_DIR}/fio/fio ${LOCAL_AE_DIR}/workload/latency_posix.fio -lat_percentiles=1 --clat_percentiles=0 -output=data/latency_posix.json -output-format=json
 
 LATENCY=$(jq '.jobs[0].read.lat_ns.percentile."50.000000"' data/latency_posix.json)
@@ -30,3 +32,5 @@ LATENCY=$(jq '.jobs[0].read.lat_ns.percentile."50.000000"' data/latency_spdk.jso
 echo "spdk, $LATENCY" >> data/latency.csv
 
 sudo bash ${LOCAL_AE_DIR}/spdk/scripts/setup.sh reset
+
+sudo rm data/*.json
