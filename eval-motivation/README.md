@@ -85,7 +85,7 @@ Please change the `CPU_FREQ_GHZ = 1.9` in extract.py to your evaluate machine CP
 ```sh
 # This will generate a result with kernel layer overhead.
 python3 scripts/extract.py data/breakdown_metrics.dat 
-python3 clean_figure4_data.py
+python3 scripts/clean_figure4_data.py
 ```
 We draw figure3 by hand so there is no script for the figure. You can check the fig/fig3_data.csv for the data.
 
@@ -95,5 +95,6 @@ Now we have data/latency.csv for figure 4 and data/breakdown.csv for figure 5
 
 #### Figure
 ```sh
-python3 plot_iou_spdk.py
+python3 scripts/figure4.py
+python3 scripts/figure5.py
 ```
