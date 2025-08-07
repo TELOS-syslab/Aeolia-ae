@@ -7,7 +7,7 @@ fs = import('fs')
 
 cc = meson.get_compiler('c')
 
-enable_rust = get_option('enable_rust')
+enable_rust = false #get_option('enable_rust')
 
 bpf_clang = find_program(get_option('bpf_clang'))
 

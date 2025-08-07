@@ -22,7 +22,6 @@ apps/**/*.sh
 ls_fio
 test_app
 
-data
 results
 plot
 __pycache__

@@ -169,7 +169,7 @@ static inline int ioprio_set(int which, int who, int ioprio_class, int ioprio,
 }
 
 #ifndef CONFIG_HAVE_GETTID
-static inline int gettid(void)
+inline int gettid(void)
 {
 	return syscall(__NR_gettid);
 }
@@ -354,16 +354,16 @@ static inline void make_pos_h_l(unsigned long *pos_h, unsigned long *pos_l,
 	*pos_h = ((uint64_t) offset) >> 32;
 #endif
 }
-static inline ssize_t preadv2(int fd, const struct iovec *iov, int iovcnt,
-			      off_t offset, unsigned int flags)
+inline ssize_t preadv2(int fd, const struct iovec *iov, int iovcnt,
+			      off_t offset,int flags)
 {
 	unsigned long pos_l, pos_h;
 
 	make_pos_h_l(&pos_h, &pos_l, offset);
 	return syscall(__NR_preadv2, fd, iov, iovcnt, pos_l, pos_h, flags);
 }
-static inline ssize_t pwritev2(int fd, const struct iovec *iov, int iovcnt,
-			       off_t offset, unsigned int flags)
+inline ssize_t pwritev2(int fd, const struct iovec *iov, int iovcnt,
+			       off_t offset, int flags)
 {
 	unsigned long pos_l, pos_h;
 
