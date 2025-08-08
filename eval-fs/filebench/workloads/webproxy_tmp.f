@@ -27,7 +27,7 @@ set $dir=/sufs
 set $nfiles=50000
 set $meandirwidth=1000000
 set $meanfilesize=512k
-set $nthreads=64
+set $nthreads=4
 set $meaniosize=16k
 set $iosize=1m
 

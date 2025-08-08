@@ -27,9 +27,9 @@ set $dir=/sufs
 set $nfiles=10000
 set $meandirwidth=20
 set $filesize=1048576
-set $nthreads=64
-set $iosize=0
-set $meanappendsize=5k
+set $nthreads=8
+set $iosize=1m
+set $meanappendsize=16k
 
 define fileset name=bigfileset,path=$dir,size=$filesize,entries=$nfiles,dirwidth=$meandirwidth,prealloc=100,readonly
 define fileset name=logfiles,path=$dir,size=$filesize,entries=1,dirwidth=$meandirwidth,prealloc
@@ -74,4 +74,4 @@ define process name=filereader,instances=1
 
 echo  "Web-server Version 3.1 personality successfully loaded"
 
-run 5
+run 2

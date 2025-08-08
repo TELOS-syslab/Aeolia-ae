@@ -268,10 +268,10 @@ sufs_libfs_mnode_dir_lookup(struct sufs_libfs_mnode *mnode, char *name) {
     sufs_libfs_chainhash_lookup(&mnode->data.dir_data.map_, name, SUFS_NAME_MAX,
                                 &ino, NULL);
 
-    if(!sufs_libfs_chainhash_lookup(&mnode->data.dir_data.map_, name, SUFS_NAME_MAX,
-                                &ino, NULL)&& (mnode->ino_num == 2)){
-        // DEBUG("sufs_libfs_mnode_dir_lookup: lookup failed, ino is %d, name is %s, pinode: %d\n", ino, name, mnode->ino_num);
-                                }
+    // if(!sufs_libfs_chainhash_lookup(&mnode->data.dir_data.map_, name, SUFS_NAME_MAX,
+    //                             &ino, NULL)&& (mnode->ino_num == 2)){
+    //     // DEBUG("sufs_libfs_mnode_dir_lookup: lookup failed, ino is %d, name is %s, pinode: %d\n", ino, name, mnode->ino_num);
+    //                             }
 
 
     // else if(ino == 0) {
@@ -454,13 +454,13 @@ bool sufs_libfs_mnode_dir_remove(struct sufs_libfs_mnode *mnode, char *name) {
     bool ret = false;
     struct sufs_dir_entry *dir;
 
-    // if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
-    //     return false;
+    if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
+        return false;
 
     // sufs_libfs_file_enter_cs(mnode);
 
-    // if (sufs_libfs_map_file(mnode, 1) != 0)
-    //     goto out;
+    if (sufs_libfs_map_file(mnode, 1) != 0)
+        goto out;
 
 
     // DEBUG("core: %d, dir infor: dir inode: %d pino_num: %d, child name: %s, map_p: %p\n", get_core_id_userspace(), mnode->ino_num, mnode->parent_mnum,

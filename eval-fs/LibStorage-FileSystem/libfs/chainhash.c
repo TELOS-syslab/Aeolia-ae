@@ -599,8 +599,8 @@ out:
     for (i = 0; i < index; i++)
         pthread_spin_unlock(&buckets[i]->lock);
 
-    if (free_src)
-        // sufs_libfs_ch_item_free(srci);
+    // if (free_src)
+    //     sufs_libfs_ch_item_free(srci);
 
     src->size--;
     dst->size++;

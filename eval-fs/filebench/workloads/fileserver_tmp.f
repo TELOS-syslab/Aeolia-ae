@@ -27,10 +27,10 @@ set $dir=/sufs
 set $nfiles=10000
 set $meandirwidth=20
 set $filesize=1048576
-set $nthreads=64
+set $nthreads=4
 set $iosize=1m
 set $meanappendsize=16k
-set $runtime=5
+set $runtime=2
 
 define fileset name=bigfileset,path=$dir,size=$filesize,entries=$nfiles,dirwidth=$meandirwidth,prealloc=80
 
