@@ -27,6 +27,14 @@ The server used for the experiments in the paper is configured with 1000 GB of
 $ ./dep.sh 
 ```
 
+### Run
+Our evaluation consists of experiments from three parts of the paper: the motivation, the AeoDriver evaluation, and the AeoFS evaluation. 
+To make it easier to reproduce our results, we have organized the experiments into separate directories:
 
+- eval-motivation/: experiments for the motivation section
 
+- eval-driver/: experiments for AeoDriver
 
+- eval-fs/: experiments for AeoFS
+
+Each directory contains a README file with detailed instructions on how to run the corresponding experiments. Please refer to them for setup and execution.
