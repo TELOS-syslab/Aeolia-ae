@@ -402,6 +402,7 @@ bool sufs_libfs_mnode_dir_remove(struct sufs_libfs_mnode *mnode, char *name) {
         goto out;
     }
 
+    sufs_libfs_cmd_release_inode(dir->ino_num, mnode->ino_num);
     dir->ino_num = SUFS_INODE_TOMBSTONE;
 
     ret = true;
