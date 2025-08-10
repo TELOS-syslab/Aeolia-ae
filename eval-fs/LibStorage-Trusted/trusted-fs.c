@@ -105,13 +105,6 @@ static void tfs_fini_states(void) {
 int __tfs_init(void) {
     int ret = 0;
 
-    // tfs_orig_open = dlsym(RTLD_NEXT, "open");
-    // LOG_INFO("TFS open %p\n", tfs_orig_open);
-    // tfs_close = dlsym(RTLD_NEXT, "close");
-    // LOG_INFO("TFS close %p\n", tfs_close);
-
-    // abort();
-
     LOG_INFO("TFS init\n");
     tfs_cmd_init();
     LOG_INFO("TFS cmd init\n");
@@ -311,8 +304,6 @@ static int __tfs_append_file(unsigned long arg) {
 static int __tfs_rename(unsigned long arg) {
     struct tfs_rename_arg *rename_arg = (struct tfs_rename_arg *)arg;
     int ret = 0;
-    // LOG_INFO("rename file, inode: %d, new_inode: %d\n",
-    //          rename_arg->old_dinode, rename_arg->new_dinode);
     ret = tfs_do_rename(rename_arg->old_finode, rename_arg->old_dinode,
                         rename_arg->new_finode, rename_arg->new_dinode,
                         rename_arg->new_name);

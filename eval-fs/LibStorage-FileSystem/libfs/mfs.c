@@ -249,10 +249,6 @@ struct sufs_libfs_mnode *sufs_libfs_namex(struct sufs_libfs_mnode *cwd,
     struct sufs_libfs_mnode *m;
     int r;
 
-#if 0
-    printf("path is %s\n", path);
-#endif
-
     if (*path == '/') {
         m = sufs_libfs_root_dir;
     } else {
@@ -370,8 +366,6 @@ s64 sufs_libfs_readm(struct sufs_libfs_mnode *m, char *buf, u64 start,
 #if 0
             printf("No delegation, len = %ld\n", len);
 #endif
-        // memcpy(buf + off, (char *)addr + pgoff, len);
-
         memcpy(buf + off, (char *)page_cache_entry->buffer.buf + pgoff, len);
 
         off += (pgend - pgoff);
@@ -431,9 +425,6 @@ s64 sufs_libfs_writem(struct sufs_libfs_mnode *m, char *buf, u64 start,
     u64 end = start + nbytes;
     u64 off = 0;
     u64 size = sufs_libfs_mnode_file_size(m);
-    // u64 e1,e2,e3,e4,e5,e6,e7,e8,e9,e10;
-    // u64 e[100];
-    // int ii = 0;
     
     int whole_lock = 0;
     int ret;
@@ -441,9 +432,6 @@ s64 sufs_libfs_writem(struct sufs_libfs_mnode *m, char *buf, u64 start,
 #if SUFS_LIBFS_RANGE_LOCK
     unsigned long start_seg = 0, end_seg = 0;
 #endif
-    // e[ii++]= sufs_libfs_rdtsc();
-    // printf("inode: %d, writem: start: %ld, end: %ld, size: %ld\n", m->ino_num,
-    //        start, end, size); 
 
     SUFS_LIBFS_DEFINE_TIMING_VAR(writem_time);
     SUFS_LIBFS_DEFINE_TIMING_VAR(index_time);
@@ -474,9 +462,7 @@ s64 sufs_libfs_writem(struct sufs_libfs_mnode *m, char *buf, u64 start,
     LOG_FS("writem begin: start: %ld, file_size: %ld, end: %ld\n", start, size,
            end);
            
-    // e[ii++]= sufs_libfs_rdtsc();
     while (start + off < end) {
-        // e[ii++] = sufs_libfs_rdtsc();
         u64 pos = start + off, pgbase = FILE_BLOCK_ROUND_DOWN(pos),
             pgoff = pos - pgbase, pgend = end - pgbase, len = 0;
 
@@ -517,19 +503,6 @@ s64 sufs_libfs_writem(struct sufs_libfs_mnode *m, char *buf, u64 start,
                 sufs_libfs_mnode_file_fill_page_cache(
                     m, pgbase / SUFS_FILE_BLOCK_SIZE,
                     (unsigned long)page_cache_entry);
-                // num_io = 0;
-                // ret =
-                //     sufs_libfs_cmd_read_blk(addr, SUFS_FILE_BLOCK_SIZE,
-                //                             &page_cache_entry->buffer, &num_io);
-                // if (ret < 0) {
-                //     WARN_FS("build cache in sufs_libfs_writem failed %d\n",
-                //             ret);
-                //     return -1;
-                // }
-                // while (*((volatile int*)(&num_io)) == 0) {
-                //     sufs_libfs_cmd_blk_idle(); 
-                //     // wait for the read to finish
-                // }
             } else {
                 // Update LRU
                 sufs_libfs_mnode_file_unlink_page_cache(m, page_cache_entry);
@@ -545,14 +518,9 @@ s64 sufs_libfs_writem(struct sufs_libfs_mnode *m, char *buf, u64 start,
              * have O_TRUNC, which discards all pages.
              */
 
-#if 0
-                printf("No delegation!\n");
-#endif
             memcpy((char *)page_cache_entry->buffer.buf + pgoff, buf + off,
                    len);
             page_cache_entry->dirty = 1;
-            // memcpy((char *)addr + pgoff, buf + off, len);
-            // sufs_libfs_clwb_buffer((char *)addr + pgoff, len);
 
             if (need_resize) {
                 LOG_FS("writem need resize\n");
@@ -633,27 +601,12 @@ s64 sufs_libfs_writem(struct sufs_libfs_mnode *m, char *buf, u64 start,
                 sufs_libfs_mnode_file_fill_page_cache(
                     m, pgbase / SUFS_FILE_BLOCK_SIZE,
                     (unsigned long)page_cache_entry);
-                // num_io = 0;
-                // ret =
-                //     sufs_libfs_cmd_read_blk(addr, SUFS_FILE_BLOCK_SIZE,
-                //                             &(page_cache_entry->buffer), &num_io);
-                // if (ret < 0) {
-                //     WARN_FS("build cache in sufs_libfs_writem failed %d\n",
-                //             ret);
-                //     return -1;
-                // }
-                // while (*((volatile int*)(&num_io)) == 0) {
-                //     sufs_libfs_cmd_blk_idle(); 
-                //     // wait for the read to finish
-                // }
             } else {
                 WARN_FS("writem: page cache entry will never not NULL\n");
             }
             memcpy((char *)page_cache_entry->buffer.buf + pgoff, buf + off,
                    len);
             page_cache_entry->dirty = 1;
-            // memcpy((void *)addr + pgoff, buf + off, len);
-            // sufs_libfs_clwb_buffer((char *)addr + pgoff, len);
         }
 
         off += len;
@@ -672,12 +625,6 @@ s64 sufs_libfs_writem(struct sufs_libfs_mnode *m, char *buf, u64 start,
 
         sufs_libfs_inode_read_unlock(m);
     }
-    // e[ii++] = sufs_libfs_rdtsc();
-    // for (int i = 0; i < ii; i++) {
-    //     printf("e[%d]: %ld | ", i, e[i+1]-e[i]);
-    // }
-    // printf("\n");
-    // sufs_libfs_sfence();
 
     SUFS_LIBFS_END_TIMING(SUFS_LIBFS_WRITEM, writem_time);
 
@@ -701,7 +648,6 @@ int sufs_libfs_truncatem(struct sufs_libfs_mnode *m, off_t length) {
     if (mbase == lbase) {
         m->data.file_data.size_ = length;
     } else if (mbase < lbase) {
-        // printf("append file, mbase: %lx, lbase: %lx\n", mbase, lbase);
         unsigned long bcount = (lbase - mbase) / SUFS_PAGE_SIZE;
 
         bcount = (bcount + SUFS_FILE_BLOCK_PAGE_CNT - 1) &
@@ -796,8 +742,6 @@ int sufs_libfs_do_map_file(struct sufs_libfs_mnode *m, int writable) {
     if (writable)
         sufs_libfs_file_set_writable(m);
 
-    // sufs_libfs_mfs_add_mapped_inode(m->ino_num);
-
     return 0;
 }
 
@@ -841,8 +785,6 @@ int sufs_libfs_map_file(struct sufs_libfs_mnode *m, int writable) {
         sufs_libfs_lock_file_mapping(m);
 
         if (sufs_libfs_file_is_mapped(m)) {
-            // WARN_FS("sufs_libfs_map_file:File is already mapped\n");
-            // sufs_libfs_unlock_file_mapping(m);
             goto out;
         }
 
@@ -855,13 +797,11 @@ int sufs_libfs_map_file(struct sufs_libfs_mnode *m, int writable) {
             LOG_FS("sufs_libfs_map_file:Building index for file: inode "
                    "%d\n",
                    m->ino_num);
-            // fflush(stdout);
             sufs_libfs_file_build_index(m);
         } else {
             LOG_FS("sufs_libfs_map_file:Building index for directory: "
                    "inode %d\n",
                    m->ino_num);
-            // fflush(stdout);
             sufs_libfs_mnode_dir_build_index(m);
         }
         
@@ -893,23 +833,6 @@ sufs_libfs_get_fidx_entry(struct sufs_libfs_fidx_entry_page *pg, int inode) {
 }
 
 // OK
-// struct sufs_libfs_fidx_entry_page *
-// sufs_libfs_fidx_entry_to_page(struct sufs_libfs_mnode *m,
-//                               struct sufs_fidx_entry *idx) {
-//     unsigned long addr = (unsigned long)idx;
-//     struct sufs_libfs_fidx_entry_page *ipage = m->fidx_entry_page_head;
-//     while (ipage != NULL) {
-//         unsigned long s = (unsigned long)ipage->page_buffer;
-//         unsigned long e = s + SUFS_PAGE_SIZE;
-//         if (addr >= s && addr < e) {
-//             return ipage;
-//         }
-//         ipage = ipage->next;
-//     }
-//     return NULL;
-// }
-
-// OK
 void sufs_libfs_file_build_index(struct sufs_libfs_mnode *m) {
     struct sufs_fidx_entry *idx =
         sufs_libfs_get_fidx_entry(m->fidx_entry_page_head, m->ino_num);
@@ -922,14 +845,7 @@ void sufs_libfs_file_build_index(struct sufs_libfs_mnode *m) {
         goto out;
     }
 
-#if 0
-    printf("m->index_start is %lx\n", (unsigned long) m->index_start);
-#endif
-
     while (idx->offset != 0) {
-#if 0
-    printf("idx is %lx\n", (unsigned long) idx);
-#endif
 
         if ((unsigned long)idx < (unsigned long)idx_start + SUFS_PAGE_SIZE - sizeof(struct sufs_fidx_entry)) {
             sufs_libfs_mnode_file_fill_index(m, idx_num, (unsigned long)idx);
@@ -948,9 +864,6 @@ void sufs_libfs_file_build_index(struct sufs_libfs_mnode *m) {
     }
 
 out:
-#if 0
-    printf("index_end is %lx\n", (unsigned long) idx);
-#endif
 
     m->index_end = idx;
 }

@@ -32,8 +32,6 @@ static inline void tfs_ibm_set_bit(char *bm, int inode_offset) {
 }
 
 static void ibm_io_callback(void *data) { 
-    // printf("ibm_io_callback: %d\n", *((int *)data));
-    // puts("ibm_io_callback");
     (*((volatile int *)data))++; 
 }
 
@@ -100,7 +98,6 @@ static void tfs_add_inode_free_lists(struct tfs_inode_free_list *free_list,
             item->prev = NULL;
             free_list->free_inode_head = item;
         }
-    // LOG_WARN("add inode free list: tot %d\n", tot);
 }
 
 // OK
@@ -125,11 +122,8 @@ static void __tfs_alloc_inode_from_kernel(struct tfs_inode_free_list *free_list,
     block->prev = NULL;
     block->size = SUFS_PAGE_SIZE * 8;
 
-    // LOG_WARN("alloc inode: cpu %d\n", cpu);
     ret =
         tfs_cmd_alloc_inodes(&(block->lba), &(block->st_inode), (&bm_num), cpu);
-    // LOG_WARN("alloc inode: cpu %d ret %d lba %lx st_inode %d bm_num %d\n", cpu, ret, 
-            //  block->lba, block->st_inode, bm_num);
 
     if (ret < 0 || bm_num != TFS_INODE_BITMAP_CHUNK) {
         LOG_ERROR("alloc inode: num_blk %d cpu %d failed\n", bm_num, cpu);
@@ -149,13 +143,6 @@ static void __tfs_alloc_inode_from_kernel(struct tfs_inode_free_list *free_list,
         block_idle(qp);
         // wait for the read to finish
     }
-
-    // LOG_INFO("allocated inode: ino %d, num %d, cpu: %d\n", block->st_inode,
-    //          bm_num, cpu);
-
-#if 0
-    printf("allocated inode: ino %d, num %d, cpu: %d\n", inode, num, cpu);
-#endif
 
     tfs_link_inode_bm_block(free_list->inode_bm_blocks, block);
     tfs_add_inode_free_lists(free_list, block);
@@ -311,17 +298,6 @@ int tfs_free_inode(struct tfs_super_block *sb, int ino) {
         pthread_spin_unlock(&free_list->lock);
         return -ENOENT;
     }
-
-    // item = malloc(sizeof(struct tfs_inode_free_item));
-
-    // item->ino = ino;
-    // item->bm_block = bm_block;
-    // if (free_list->free_inode_head != NULL) {
-    //     free_list->free_inode_head->prev = item;
-    // }
-    // item->next = free_list->free_inode_head;
-    // item->prev = NULL;
-    // free_list->free_inode_head = item;
 
     tfs_inode_bm_buffer_clear(bm_block, ino);
 

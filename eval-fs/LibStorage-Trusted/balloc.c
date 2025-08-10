@@ -692,7 +692,6 @@ int tfs_new_blocks(struct tfs_super_block *sb, int num_blocks,
     cpu = get_core_id_userspace();
     free_list = tfs_get_free_list(sb, cpu);
     pthread_spin_lock(&free_list->s_lock);
-    // LOG_WARN("new_blocks: %d, cpu :%d\n", num_blocks, cpu);
 
     if (not_enough_blocks(free_list, num_blocks)) {
         LOG_INFO("not enough blocks: cpu %d, free_blocks %ld, required %lu\n", cpu,

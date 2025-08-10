@@ -109,23 +109,6 @@ int sufs_libfs_sys_close(struct sufs_libfs_proc *proc, int fd) {
     if (!f)
         return -1;
     struct sufs_libfs_mnode *m = f->m;
-    // sufs_libfs_sys_fdatasync(proc, fd);
-
-
-    // struct sufs_libfs_page_cache_entry *prev;
-    // struct sufs_libfs_page_cache_entry *page_cache_entry =
-    //     m->data.file_data.lru_page_cache_head;
-    // while (page_cache_entry) {
-    //     prev = page_cache_entry;
-    //     sufs_libfs_cmd_free_dma_buffer(&page_cache_entry->buffer);
-    //     page_cache_entry = page_cache_entry->next;
-    //     free(prev);
-    // }
-    // m->data.file_data.lru_page_cache_head = NULL;
-    // m->data.file_data.lru_page_cache_tail = NULL;
-    
-    // sufs_libfs_radix_array_fini(&m->data.file_data.page_cache_);
-
 
     /* Informs the kernel that this file is no longer in the critical section */
     sufs_libfs_file_exit_cs(f->m);
@@ -133,46 +116,6 @@ int sufs_libfs_sys_close(struct sufs_libfs_proc *proc, int fd) {
     sufs_libfs_filetable_close(proc->ftable, fd);
 
     return 0;
-}
-
-int sufs_libfs_sys_link(struct sufs_libfs_proc *proc, char *old_path,
-                        char *new_path) {
-#if 0
-    char oldname[SUFS_NAME_MAX];
-    char name[SUFS_NAME_MAX];
-
-    struct sufs_libfs_mnode *olddir = NULL, *ms = NULL, *md = NULL, *cwd_m = NULL;
-
-    cwd_m = proc->cwd_m;
-
-    olddir = sufs_libfs_nameiparent(cwd_m, old_path, oldname);
-    if (!olddir)
-        return -1;
-
-    /* Check if the old name exists; if not, abort right away */
-    if (!(ms = sufs_libfs_mnode_dir_exists(olddir, oldname)))
-        return -1;
-
-    if (sufs_libfs_mnode_type(ms) == SUFS_MNODE_TYPE_DIR)
-        return -1;
-
-    md = sufs_libfs_nameiparent(cwd_m, new_path, name);
-    if (!md)
-        return -1;
-
-    /*
-     * Check if the target name already exists; if so,
-     * no need to grab a link count on the old name.
-     */
-    if (sufs_libfs_mnode_dir_exists(md, name))
-        return -1;
-
-    if (!sufs_libfs_mnode_dir_insert(md, name, ms))
-        return -1;
-
-    return 0;
-#endif
-    return -1;
 }
 
 /* A special version for directory lookup used in rename */
@@ -303,20 +246,10 @@ int sufs_libfs_sys_rename(struct sufs_libfs_proc *proc, char *old_path,
             mdnew, newname, mfroadblock, mdold, oldname, mfold,
             mfold_type == SUFS_FILE_TYPE_DIR ? mfold : NULL, &item)) {
         
-        // int test_inode = 0;
-        // int test_cpu = sufs_libfs_current_cpu();
-        // sufs_libfs_chainhash_lookup(&mdnew->data.dir_data.map_, "0", SUFS_NAME_MAX,
-        //     &test_inode, NULL);
-        // if(test_inode == 0){
-        //     DEBUG("sufs_libfs_sys_rename: test_inode is 0, test_cpu is %d\n", test_cpu);
-        //     abort();
-        // }
 
         struct sufs_dir_entry *new_dir = NULL, *old_dir = NULL, *rb_dir = NULL;
-        // unsigned long journal_tail = 0;
 
         int name_len = strlen(newname) + 1;
-        // int cpu = 0;
         new_dir = (struct sufs_dir_entry *)malloc(
             sizeof(struct sufs_dir_entry) + name_len);
 
@@ -378,9 +311,6 @@ sufs_libfs_create(struct sufs_libfs_mnode *cwd, char *path, short type,
     int name_len = 0;
     int ret;
 
-    // unsigned long e1,e2,e3,e4;
-    // e1 = sufs_libfs_rdtsc();
-
     LOG_FS("sufs_libfs_create: path: %s, name: %s\n", path, name);
     if (!md || sufs_libfs_mnode_dir_killed(md)) {
 
@@ -393,7 +323,6 @@ sufs_libfs_create(struct sufs_libfs_mnode *cwd, char *path, short type,
         if (error) {
             *error = EEXIST;
         }
-        // WARN_FS("Failed because name %s exists!\n", name);
         return NULL;
     }
 
@@ -412,24 +341,6 @@ sufs_libfs_create(struct sufs_libfs_mnode *cwd, char *path, short type,
 
     name_len = strlen(name) + 1;
 
-    // struct sufs_libfs_ch_item *item = NULL;
-
-    // if (sufs_libfs_mnode_dir_insert_create(md, name, name_len, &item)) {
-
-    //     dir = (struct sufs_dir_entry *)malloc(sizeof(struct sufs_dir_entry) + name_len);
-    //     strcpy(dir->name, name);
-    //     // dir->ino_num = mf->ino_num;
-    //     dir->rec_len = sizeof(struct sufs_dir_entry) + name_len;
-
-    //     item->val2 = (unsigned long)dir;
-        
-    // } else {
-    //     WARN_FS("Existing name %s\n", name);
-    //     *error = EEXIST;
-    //     return NULL;
-    // }
-    // e2 = sufs_libfs_rdtsc();
-
     ret = sufs_libfs_cmd_alloc_inode_in_directory(&inode, md->ino_num, name_len,
                                                   type, mode, uid, gid, name);
 
@@ -443,8 +354,6 @@ sufs_libfs_create(struct sufs_libfs_mnode *cwd, char *path, short type,
         return NULL;
     }
 
-    // item->val = inode;
-    // dir->ino_num = inode;
     mf = sufs_libfs_mfs_mnode_init(type, inode, md->ino_num, NULL);
     LOG_FS("sufs_libfs_create: inode: %d\n", inode);
 
@@ -461,16 +370,9 @@ sufs_libfs_create(struct sufs_libfs_mnode *cwd, char *path, short type,
         /* update name_len here to finish the creation */
         dir->name_len = name_len;
 
-        // sufs_libfs_dentry_page_wb(md->data.dir_data.dentry_page_head);
-        // sufs_libfs_clwb_buffer(dir, sizeof(struct sufs_dir_entry) +
-        // name_len); sufs_libfs_sfence();
-        // e4 = sufs_libfs_rdtsc();
-        // printf("create file: time1: %lu, time2: %lu, time3: %lu, total time: %lu\n",
-        //        e2 - e1, e3 - e2, e4 - e3, e4 - e1);
         return mf;
     }
 
-    // sufs_libfs_free_inode(&sufs_libfs_sb, inode);
     sufs_libfs_mnode_array[inode] = NULL;
 
     free(mf);
@@ -490,7 +392,6 @@ int sufs_libfs_sys_openat(struct sufs_libfs_proc *proc, int dirfd, char *path,
     int err = 0;
 
     LOG_FS("file open at: %s\n", path);
-    // fflush(stdout);
     if (dirfd == AT_FDCWD) {
         cwd = proc->cwd_m;
     } else {
@@ -514,8 +415,6 @@ int sufs_libfs_sys_openat(struct sufs_libfs_proc *proc, int dirfd, char *path,
         m = sufs_libfs_namei(cwd, path);
         LOG_FS("sufs_libfs_sys_openat sufs_libfs_namei success!\n");
     }
-
-    // fflush(stdout);
 
     if (!m) {
         WARN_FS("Failed to create/namei dirfd %d , cwd inode:%d ,file %s\n",dirfd,cwd ->ino_num,
@@ -541,7 +440,6 @@ int sufs_libfs_sys_openat(struct sufs_libfs_proc *proc, int dirfd, char *path,
     if ((ret = sufs_libfs_map_file(m, !(rwmode == O_RDONLY))) != 0)
         return ret;
     LOG_FS("sufs_libfs_sys_openat map success!\n");
-    // fflush(stdout);
 
     /* release it during close */
     sufs_libfs_file_enter_cs(m);
@@ -554,7 +452,6 @@ int sufs_libfs_sys_openat(struct sufs_libfs_proc *proc, int dirfd, char *path,
     f = sufs_libfs_file_mnode_init(m, !(rwmode == O_WRONLY),
                                    !(rwmode == O_RDONLY), !!(flags & O_APPEND));
     LOG_FS("sufs_libfs_sys_openat end!\n");
-    // fflush(stdout);
     return sufs_libfs_fdalloc(proc, f, flags);
 }
 
@@ -613,11 +510,9 @@ ssize_t sufs_libfs_sys_read(struct sufs_libfs_proc *proc, int fd, void *p,
     struct sufs_libfs_file_mnode *f = NULL;
     ssize_t res = 0;
     LOG_FS("sufs_libfs_sys_read\n");
-    // fflush(stdout);
     f = sufs_libfs_getfile(proc, fd);
 
     LOG_FS("getfile success\n");
-    // fflush(stdout);
 
     if (!f) {
         fprintf(stderr, "Cannot find file from fd: %d\n", fd);
@@ -626,7 +521,6 @@ ssize_t sufs_libfs_sys_read(struct sufs_libfs_proc *proc, int fd, void *p,
 
     res = sufs_libfs_file_mnode_read(f, (char *)p, n);
     LOG_FS("sufs_libfs_file_mnode_read %ld\n", res);
-    // fflush(stdout);
     if (res < 0) {
         res = -1;
         goto out;
@@ -721,9 +615,6 @@ int sufs_libfs_sys_mkdirat(struct sufs_libfs_proc *proc, int dirfd, char *path,
 
     if (!sufs_libfs_create(cwd, path, SUFS_FILE_TYPE_DIR, mode, proc->uid,
                            proc->gid, true, &err)) {
-#if 0
-        printf("failed at sufs_libfs_create!\n");
-#endif
         errno = err;
         return -1;
     }

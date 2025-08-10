@@ -514,8 +514,6 @@ static int tfs_dir_entry_insert(struct tfs_inode_cache *pinode_cache,
     struct tfs_dir_cache *dir_cache = pinode_cache->dir_cache;
     struct tfs_dir_entry *dir;
     struct tfs_dentry_buffer_list *dentry_buffer;
-    // unsigned long e1,e2,e3,e4,e5;
-    // e1 = tfs_rdtsc();
     int cpu = get_core_id_userspace();
     int record_len = sizeof(struct tfs_dir_entry) + name_len;
     pthread_spin_lock(&(dir_cache->dir_tails[cpu].lock));
@@ -563,7 +561,6 @@ static int tfs_dir_entry_insert(struct tfs_inode_cache *pinode_cache,
     dir_cache->dir_tails[cpu].dentry_buffer = dentry_buffer;
     pthread_spin_unlock(&(dir_cache->dir_tails[cpu].lock));
 
-    // e2 = tfs_rdtsc();
 
     LOG_INFO("tfs_dir_entry_insert: dir %p, dentry_buffer %p\n", dir, dentry_buffer);
 
@@ -572,11 +569,9 @@ static int tfs_dir_entry_insert(struct tfs_inode_cache *pinode_cache,
     dir_map_item->dentry_buffer = dentry_buffer;
     dir_map_item->dentry_entry = dir;
 
-    // e3 = tfs_rdtsc();
     tfs_chainhash_insert(dir_cache->map_, inode, (unsigned long)dir_map_item,
                     0, NULL);
 
-    // e4 = tfs_rdtsc();
     tfs_run_journal(tfs_state->super_block->journal,
                     dentry_buffer->dentry_buffer.lba, SUFS_FILE_BLOCK_SIZE,
                     dentry_buffer->dentry_buffer.buf);
@@ -594,9 +589,6 @@ static int tfs_dir_entry_insert(struct tfs_inode_cache *pinode_cache,
     dir->inode.atime = 0;
     dir->inode.ctime = 0;
     dir->inode.mtime = 0;
-    // e5 = tfs_rdtsc();
-    // LOG_WARN("tfs create: time1 %ld, time2 %ld, time3 %ld, time4 %ld, tot %ld\n",
-    //         e2 - e1, e3 - e2, e4 - e3, e5 - e4, e5 - e1);
     LOG_INFO("build end dir entry %p\n", dir);
     return 0;
 }
@@ -606,9 +598,6 @@ int tfs_do_alloc_inode_in_directory(int *inode, int pinode, int name_len,
                                     char *name) {
     int ret = 0;
     int ninode = 0;
-    // unsigned long e1,e2,e3,e4,e5;
-    // e1 = tfs_rdtsc();
-    // LOG_WARN("tfs_do_alloc_inode_in_directory: alloc inode in directory %s, dir_inode: %d\n", name, pinode);                                        
 
     struct tfs_inode_cache *pinode_cache = tfs_inode_cache_array[pinode];
     if (pinode_cache == NULL) {
@@ -629,10 +618,8 @@ int tfs_do_alloc_inode_in_directory(int *inode, int pinode, int name_len,
         return -1;
     }
     LOG_INFO("tfs_do_alloc_inode_in_directory:alloc inode %d\n", ninode);
-    // e2 = tfs_rdtsc();
     tfs_dir_entry_insert(pinode_cache, name, name_len, type, mode, uid, gid,
                          ninode);
-    // e3 = tfs_rdtsc();
     struct tfs_inode_cache *inode_cache = tfs_inode_cache_array[ninode];
     if (inode_cache == NULL) {
         inode_cache =
@@ -640,7 +627,6 @@ int tfs_do_alloc_inode_in_directory(int *inode, int pinode, int name_len,
         tfs_build_inode_cache(inode_cache, ninode, 0);
         tfs_inode_cache_array[ninode] = inode_cache;
     }
-    // e4 = tfs_rdtsc();
     tfs_run_journal(
         tfs_state->super_block->journal, inode_cache->sinode_buffer->lba,
         inode_cache->sinode_buffer->size, inode_cache->sinode_buffer->buf);
@@ -654,9 +640,7 @@ int tfs_do_alloc_inode_in_directory(int *inode, int pinode, int name_len,
     sinode->index_offset = 0;
     tfs_exit_journal(tfs_state->super_block->journal);
     *inode = ninode;
-    // e5 = tfs_rdtsc();
-    // LOG_WARN("tfs create: time1 %ld, time2 %ld, time3 %ld, time4 %ld, tot %ld\n",
-    //         e2 - e1, e3 - e2, e4 - e3, e5 - e4, e5 - e1);
+    
     return ret;
 }
 
@@ -733,12 +717,10 @@ int tfs_do_release_inode(int ino, int pinode, int need_journal) {
     dir_map_item->dentry_entry->ino_num = SUFS_INODE_TOMBSTONE;
     tfs_free_inode(tfs_state->super_block, ino);
     if(need_journal)tfs_exit_journal(tfs_state->super_block->journal);
-    // LOG_WARN("tfs_do_release_inode: release inode %d, pinode %d, time1: %ld, time2: %ld, time3: %ld, time4 %d\n", ino, pinode, e2-e1, e3-e2, e4-e3, e5-e4);
     return ret;
 }
 
 int tfs_do_truncate_inode(int inode) {
-    // LOG_WARN("tfs_do_truncate_inode: truncate inode %d\n", inode);
     int ret = 0;
     struct tfs_inode_cache *inode_cache = tfs_inode_cache_array[inode];
     if (inode_cache == NULL) {
@@ -842,7 +824,6 @@ int tfs_do_truncate_file(int inode, unsigned long index_lba, int offset){
     tfs_run_journal(tfs_state->super_block->journal,
                     fidx->fidx_buffer.lba, SUFS_PAGE_SIZE,
                     fidx->fidx_buffer.buf);
-    // first_entry->offset = 0;                
     memset((void *)(st_fidx_entry), 0 , SUFS_PAGE_SIZE - offset * sizeof(struct tfs_fidx_entry));
 
     fidx = fidx->prev;
@@ -1110,10 +1091,8 @@ static int tfs_rename_check(int old_finode, int new_dinode){
 
 int tfs_do_rename(int old_finode, int old_dinode, int new_finode,
                   int new_dinode, char *new_name) {
-    // return 0;
     int ret = 0;
-    // struct tfs_inode_cache *old_file_inode_cache =
-    //     tfs_inode_cache_array[old_finode];
+
     struct tfs_inode_cache *old_dir_inode_cache =
         tfs_inode_cache_array[old_dinode];
     struct tfs_inode_cache *new_dir_inode_cache =
@@ -1178,11 +1157,6 @@ int tfs_do_rename(int old_finode, int old_dinode, int new_finode,
         }
     }
 
-    // dir_cache = old_dir_inode_cache->dir_cache;
-    // dir_map_item =
-    //     (struct tfs_dir_map_item *)tfs_radix_array_find(dir_cache->map_,
-    //                                                     old_finode, 0, 0);
-    
     tfs_run_journal(tfs_state->super_block->journal,
                     dir_map_item->dentry_buffer->dentry_buffer.lba,
                     SUFS_FILE_BLOCK_SIZE,

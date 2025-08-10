@@ -566,15 +566,6 @@ __attribute__((constructor)) void sufs_libfs_init(void) {
 
     sufs_libfs_fs_init();
 
-    // /* This needs to be performed after we have registered the LibFS with KFS
-    // */ sufs_libfs_alloc_inode_free_lists(&sufs_libfs_sb);
-
-    // sufs_libfs_init_inode_free_lists(&sufs_libfs_sb);
-
-    // sufs_libfs_alloc_block_free_lists(&sufs_libfs_sb);
-
-    // sufs_libfs_init_block_free_list(&sufs_libfs_sb, 0);
-
     /* This needs to be performed after we have initialized the root */
     sufs_libfs_do_proc_init();
 
@@ -583,15 +574,6 @@ __attribute__((constructor)) void sufs_libfs_init(void) {
     // sufs_libfs_ring_buffer_connect(&sufs_libfs_sb);
 
     sufs_libfs_premap_files(sufs_libfs_premap_str);
-    // fflush(stdout);
-#if 0
-    {
-        int cpu = 0, node = 0;
-        sufs_libfs_getcpu(&cpu, &node);
-
-        printf("cpu is %d, node is %d\n", cpu, node);
-    }
-#endif
 }
 
 // OK

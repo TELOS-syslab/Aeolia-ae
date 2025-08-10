@@ -58,13 +58,6 @@ int tfs_init_tls(int tid) {
         return -1;
     }
 
-    // result =
-    //     register_uintr(tfs_tls_state[tid].dev_args, tfs_tls_state[tid].nvme);
-    // if (result < 0) {
-    //     LOG_ERROR("Failed to register uintr\n");
-    //     return -1;
-    // }
-
     // Protect buffers
     protect_buffer_with_pkey((void *)(tfs_tls_state[tid].stack_addr),
                              TFS_STACK_SIZE, tfs_state->pkey);
@@ -93,7 +86,6 @@ int tfs_tls_my_tid(void) {
 
     if (ret == -1) {
         tls_my_thread = atomic_fetch_add(&tfs_tid, 1);
-        // tfs_init_tls(tls_my_thread);
         ret = tls_my_thread;
     }
 

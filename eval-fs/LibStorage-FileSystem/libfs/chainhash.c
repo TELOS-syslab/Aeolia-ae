@@ -30,10 +30,6 @@ static inline void sufs_libfs_ch_item_init(struct sufs_libfs_ch_item *item,
     item->key = malloc(size);
     strcpy(item->key, key);
 
-#if 0
-    printf("key is %s, item key is %s\n", key, item->key);
-#endif
-
     item->val = value;
     item->val2 = value2;
 }
@@ -131,20 +127,9 @@ bool sufs_libfs_chainhash_lookup(struct sufs_libfs_chainhash *hash, char *key,
 
     b = sufs_libfs_get_buckets(hash, key, max_size);
 
-#if 0
-    pthread_spin_lock(&b->lock);
-#endif
 
     if (b->dead_) {
-#if 0
-        pthread_spin_unlock(&b->lock);
-#endif
-
         b = sufs_libfs_chainhash_find_resize_buckets(hash, key, max_size);
-
-#if 0
-        pthread_spin_lock(&b->lock);
-#endif
     }
 
     for (i = b->head; i != NULL; i = i->next) {
@@ -164,9 +149,6 @@ bool sufs_libfs_chainhash_lookup(struct sufs_libfs_chainhash *hash, char *key,
     ret = false;
 
 out:
-#if 0
-    pthread_spin_unlock(&b->lock);
-#endif
     return ret;
 }
 
@@ -200,10 +182,6 @@ sufs_libfs_chainhash_new_size(struct sufs_libfs_chainhash *hash, int enlarge) {
 static void sufs_libfs_chainhash_resize(struct sufs_libfs_chainhash *hash,
                                         int enlarge, int max_size) {
     int i = 0;
-
-#if 0
-    return;
-#endif
 
     /* The resize is already in progress, return */
     if (!__sync_bool_compare_and_swap(&hash->nbuckets_resize_, 0, 1))
@@ -250,14 +228,6 @@ static void sufs_libfs_chainhash_resize(struct sufs_libfs_chainhash *hash,
             nb = &hash->buckets_resize_[sufs_libfs_hash_string(prev->key,
                                                                max_size) %
                                         hash->nbuckets_resize_];
-#if 0
-            printf("resize item: %s\n", prev->key);
-            if (strcmp(prev->key, "1216ugwzkisybd") == 0)
-            {
-                printf("bucket is %ld, size: %ld, max_size: %d\n", sufs_libfs_hash_string(prev->key, max_size)
-                                         % hash->nbuckets_resize_, hash->nbuckets_resize_, max_size);
-            }
-#endif
 
             pthread_spin_lock(&(nb->lock));
 
@@ -304,8 +274,6 @@ bool sufs_libfs_chainhash_insert(struct sufs_libfs_chainhash *hash, char *key,
     struct sufs_libfs_ch_item *i = NULL;
     struct sufs_libfs_ch_bucket *b = NULL;
 
-    // unsigned long e1,e2,e3,e4;
-    // e1 = sufs_libfs_rdtsc();
 
     if (hash->dead_) {
         return false;
@@ -330,8 +298,6 @@ bool sufs_libfs_chainhash_insert(struct sufs_libfs_chainhash *hash, char *key,
     }
 
 
-    // e2 = sufs_libfs_rdtsc();
-
     for (i = b->head; i != NULL; i = i->next) {
         if (strcmp(i->key, key) == 0) {
 
@@ -341,11 +307,7 @@ bool sufs_libfs_chainhash_insert(struct sufs_libfs_chainhash *hash, char *key,
         }
     }
 
-    // e3 = sufs_libfs_rdtsc();
-
     i = malloc(sizeof(struct sufs_libfs_ch_item));
-
-
 
     sufs_libfs_ch_item_init(i, key, max_size, val, val2);
 
@@ -367,10 +329,6 @@ out:
         hash->size > hash->nbuckets_ * SUFS_LIBFS_DIR_REHASH_FACTOR) {
         sufs_libfs_chainhash_resize(hash, 1, max_size);
     }
-
-    // e4 = sufs_libfs_rdtsc();
-    // printf("chain_hash cost: time1: %ld, time2: %ld, time3: %ld, total: %ld\n",
-    //        e2 - e1, e3 - e2, e4 - e3, e4 - e1);
 
     return ret;
 }
@@ -664,24 +622,12 @@ bool sufs_libfs_chainhash_enumerate(struct sufs_libfs_chainhash *hash,
     u64 i = 0;
     bool prevbucket = (prev != NULL);
 
-#if 0
-    printf("hash size upon enumerate :%ld\n", hash->size);
-#endif
-
     i = prev ? sufs_libfs_hash_string(prev, max_size) % hash->nbuckets_ : 0;
-
-#if 0
-    printf("prev: %s, i is %ld, size: %ld\n", prev, i, hash->nbuckets_);
-#endif
 
     for (; i < hash->nbuckets_; i++) {
         struct sufs_libfs_ch_bucket *b = &hash->buckets_[i];
         struct sufs_libfs_ch_item *item;
         bool found = false;
-
-#if 0
-        pthread_spin_lock(&hash->buckets_[i].lock);
-#endif
 
         for (item = b->head; item != NULL; item = item->next) {
             if (prevbucket) {
@@ -690,18 +636,10 @@ bool sufs_libfs_chainhash_enumerate(struct sufs_libfs_chainhash *hash,
             } else {
                 strcpy(out, item->key);
 
-#if 0
-                printf("out is %s, i is %ld\n", out, i);
-#endif
-
                 found = true;
                 break;
             }
         }
-
-#if 0
-        pthread_spin_unlock(&hash->buckets_[i].lock);
-#endif
 
         if (found)
             return true;
@@ -728,11 +666,6 @@ __ssize_t sufs_libfs_chainhash_getdents(struct sufs_libfs_chainhash *hash,
     u64 i = offset >> 32;
     u64 j = offset & 0xffffffff;
 
-#if 0
-    printf("enter: i: %ld, j: %ld, length: %ld, tot_dentry: %ld\n", i, j, length,
-            hash->size);
-#endif
-
     struct linux_dirent64 *iter_ptr = buffer;
     size_t iter_offset = 0;
 
@@ -740,10 +673,6 @@ __ssize_t sufs_libfs_chainhash_getdents(struct sufs_libfs_chainhash *hash,
         count = 0;
         struct sufs_libfs_ch_bucket *b = &hash->buckets_[i];
         struct sufs_libfs_ch_item *item = NULL;
-
-#if 0
-        pthread_spin_lock(&hash->buckets_[i].lock);
-#endif
 
         for (item = b->head; item != NULL; item = item->next) {
             if (j > 0) {
@@ -755,9 +684,6 @@ __ssize_t sufs_libfs_chainhash_getdents(struct sufs_libfs_chainhash *hash,
                 dent_size = sizeof(struct linux_dirent64) + dir->name_len - 1;
 
                 if (iter_offset + dent_size > length) {
-#if 0
-                    pthread_spin_unlock(&hash->buckets_[i].lock);
-#endif
                     goto out;
                 }
                 iter_ptr->d_ino = item->val;
@@ -778,19 +704,11 @@ __ssize_t sufs_libfs_chainhash_getdents(struct sufs_libfs_chainhash *hash,
             count++;
         }
 
-#if 0
-        pthread_spin_unlock(&hash->buckets_[i].lock);
-#endif
-
         j = 0;
     }
 
 out:
     (*offset_ptr) = ((i << 32) | count);
-
-#if 0
-    printf("leave: i: %ld, j: %ld, return: %ld\n", i, count, iter_offset);
-#endif
 
     return iter_offset;
 }

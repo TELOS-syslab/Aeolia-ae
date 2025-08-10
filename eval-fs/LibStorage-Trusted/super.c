@@ -22,8 +22,6 @@ void tfs_init_sb(struct tfs_super_block *sb) {
     sb->sinode_start =
         sb->block_bitmap_start + FS_FREE_BITMAP_LOGICAL_BLOCKS * FS_BLOCK_SIZE;
 
-    // sb->data_start = sb->sinode_start +
-    //                  SUFS_MAX_INODE_NUM * sizeof(struct sufs_shadow_inode);
     sb->data_start = FS_HEAD_BYTES;
 
     sb->journal_start = FS_TOTAL_BYTES;

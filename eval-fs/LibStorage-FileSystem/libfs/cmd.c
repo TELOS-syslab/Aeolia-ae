@@ -19,9 +19,6 @@ int sufs_libfs_cmd_map_file(int ino, int writable,
 
     entry.inode = ino;
     entry.perm = writable;
-#if 0
-    printf("ino is %d\n", ino);
-#endif
 
     ret = tfs_mmap_file((unsigned long)&entry);
 

@@ -34,19 +34,13 @@ sudo ./figure16.sh
 
 ```
 
-## 4. Evaluate filebench
-
-```sh
-sudo ./figure18.sh
-```
-
-## 5. Evaluate Real-worlds (leveldb)
+## 4. Evaluate Real-worlds (leveldb)
 
 ```sh
 sudo ./table7.sh
 ```
 
-## 6. Data Cleaning & Figure
+## 5. Data Cleaning & Figure
 
 ```sh
 sudo python3 clean_data.py
@@ -55,5 +49,4 @@ sudo python3 clean_data.py
 sudo python3 plot_fs_single_thread.py # figure 14
 sudo python3 plot_fs_multi_threads.py # figure 15
 sudo python3 plot_fs_fxmark.py # figure 16
-sudo python3 plot_fs_filebench # figure 18
 ```
