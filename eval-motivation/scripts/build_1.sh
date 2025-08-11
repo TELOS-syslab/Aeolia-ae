@@ -9,7 +9,7 @@ sudo ./scripts/pkgdep.sh
 ./configure --with-fio=${LOCAL_AE_DIR}/fio
 make -j$(nproc)
 
-cd ${LOCAL_AE_DIR}/aoelia-kernel-interrupt_breakdown
+cd ${LOCAL_AE_DIR}/aeolia_kernel-interrupt_breakdown
 cp /boot/config-$(uname -r) ./.config
 sudo make olddefconfig
 sudo make -j$(nproc)
