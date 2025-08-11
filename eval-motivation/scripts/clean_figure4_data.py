@@ -98,7 +98,7 @@ def generate_csv():
     print(iou_breakdown)
     
     # Define all methods
-    methods = ['iou_dfl', 'iou_poll', 'spdk']
+    methods = ['iou_dfl_flat', 'iou_poll_flat', 'spdk_flat', 'iou_dfl', 'iou_poll', 'spdk']
     
     # Prepare data for CSV
     categories = ['device', 'processing', 'kernel overhead', 'interrupt', 'schedule', 'others']
@@ -110,7 +110,7 @@ def generate_csv():
         row = {'Category': category}
         
         for method in methods:
-            if method == 'iou_dfl':
+            if method == 'iou_dfl_flat':
                 # Use breakdown data for iou_dfl
                 if category == 'device':
                     row[method] = iou_breakdown.get('device', device_time)
@@ -124,16 +124,48 @@ def generate_csv():
                     row[method] = iou_breakdown.get(' scheduling', 0)
                 elif category == 'others':
                     row[method] = iou_breakdown.get('others', 0)
+            elif method == 'spdk_flat':
+                # For spdk, only device and processing time
+                if category == 'device':
+                    row[method] = device_time
+                elif category == 'processing':
+                    total_time = latency_data.get("spdk", 0)
+                    row[method] = calculate_processing_time(total_time, device_time)
+                else:
+                    row[method] = 0
+            elif method == 'iou_poll_flat':
+                # For other methods (iou_poll, posix, aeolia), only device and processing time
+                if category == 'device':
+                    row[method] = device_time
+                elif category == 'processing':
+                    total_time = latency_data.get("iou_poll", 0)
+                    row[method] = calculate_processing_time(total_time, device_time)
+                else:
+                    row[method] = 0
+            elif method == 'iou_dfl':
+                # Use breakdown data for iou_dfl
+                if category == 'device':
+                    row[method] = iou_breakdown.get('device', device_time)
+                elif category == 'processing':
+                    row[method] = iou_breakdown.get(' processing', 0) + iou_breakdown.get('device', device_time)
+                elif category == 'kernel overhead':
+                    row[method] = iou_breakdown.get(' k_overhead', 0) + iou_breakdown.get(' processing', 0) + iou_breakdown.get('device', device_time)
+                elif category == 'interrupt':
+                    row[method] = iou_breakdown.get(' interrupt', 0) + iou_breakdown.get(' k_overhead', 0) + iou_breakdown.get(' processing', 0) + iou_breakdown.get('device', device_time)
+                elif category == 'schedule':
+                    row[method] = iou_breakdown.get(' scheduling', 0) + iou_breakdown.get(' interrupt', 0) + iou_breakdown.get(' k_overhead', 0) + iou_breakdown.get(' processing', 0) + iou_breakdown.get('device', device_time)
+                elif category == 'others':
+                    row[method] = iou_breakdown.get('others', 0) + iou_breakdown.get(' scheduling', 0) + iou_breakdown.get(' interrupt', 0) + iou_breakdown.get(' k_overhead', 0) + iou_breakdown.get(' processing', 0) + iou_breakdown.get('device', device_time)
             elif method == 'spdk':
                 # For spdk, only device and processing time
                 if category == 'device':
                     row[method] = device_time
                 elif category == 'processing':
                     total_time = latency_data.get(method, 0)
-                    row[method] = calculate_processing_time(total_time, device_time)
+                    row[method] = total_time
                 else:
                     row[method] = 0
-            else:
+            elif method == 'iou_poll':
                 # For other methods (iou_poll, posix, aeolia), only device and processing time
                 if category == 'device':
                     row[method] = device_time
@@ -142,48 +174,10 @@ def generate_csv():
                     row[method] = calculate_processing_time(total_time, device_time)
                 else:
                     row[method] = 0
-        
+            
         output_data.append(row)
     
-    # Convert to stacked format
-    stacked_data = []
-    for i, category in enumerate(categories):
-        row = {'Category': category}
-        
-        for method in methods:
-            if method == 'iou_dfl':
-                # For iou_dfl, accumulate values
-                if category == 'device':
-                    row[method] = output_data[0][method]  # device
-                elif category == 'processing':
-                    row[method] = output_data[0][method] + output_data[1][method]  # device + processing
-                elif category == 'kernel overhead':
-                    row[method] = output_data[0][method] + output_data[1][method] + output_data[2][method]  # device + processing + kernel overhead
-                elif category == 'interrupt':
-                    row[method] = output_data[0][method] + output_data[1][method] + output_data[2][method] + output_data[3][method]  # device + processing + kernel overhead + interrupt
-                elif category == 'schedule':
-                    row[method] = output_data[0][method] + output_data[1][method] + output_data[2][method] + output_data[3][method] + output_data[4][method]  # device + processing + kernel overhead + interrupt + schedule
-                elif category == 'others':
-                    row[method] = output_data[0][method] + output_data[1][method] + output_data[2][method] + output_data[3][method] + output_data[4][method] + output_data[5][method]  # all categories
-            elif method == 'iou_poll':
-                # For iou_poll, only device and processing
-                if category == 'device':
-                    row[method] = output_data[0][method]  # device
-                elif category == 'processing':
-                    row[method] = output_data[0][method] + output_data[1][method]  # device + processing
-                else:
-                    row[method] = 0
-            elif method == 'spdk':
-                # For spdk, only device and processing
-                if category == 'device':
-                    row[method] = output_data[0][method]  # device
-                elif category == 'processing':
-                    row[method] = output_data[0][method] + output_data[1][method]  # device + processing
-                else:
-                    row[method] = 0
-        
-        output_data.append(row)
-    
+    print(output_data)
     # Write to CSV file
     output_file = 'data/data_iou_spdk.csv'
     with open(output_file, 'w', newline='') as f:

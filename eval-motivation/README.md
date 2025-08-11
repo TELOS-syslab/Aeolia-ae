@@ -24,7 +24,7 @@ echo "export LOCAL_AE_DIR=$(pwd)" >> ~/.bashrc
 ### 1. Checkout to branch and build them
 
 ```sh
-./scripts/build_1.sh
+./scripts/build_1.sh && sudo reboot
 
 # please reboot to this new kernel, which will record timestamps and print them after io_uring processing
 ```
@@ -34,7 +34,8 @@ echo "export LOCAL_AE_DIR=$(pwd)" >> ~/.bashrc
 #### 2.1 Get the breakdown time
 
 ```sh
-./scripts/breakdown.sh
+
+cd $LOCAL_AE_DIR && ./scripts/breakdown.sh
 ```
 
 #### 2.2 Get the access latency
@@ -44,29 +45,30 @@ echo "export LOCAL_AE_DIR=$(pwd)" >> ~/.bashrc
 revert to the origin 6.12 kernel
 
 ```sh
-./scripts/build_2.sh
+./scripts/build_2.sh  && sudo reboot
 # please reboot to this new kernel, which is the origin kernel that will show original performance
-# after reboot, then
-cd ${LOCAL_AE_DIR} && ./scripts/latency.sh
+# after reboot, then, if you use your own machine, change this PCIe addr to your optane ssd addr
+cd ${LOCAL_AE_DIR} && ./scripts/latency.sh 0000:c8:00.0
 ```
 2.2.2 Latency with optimized iouring
 
 ```sh
-./scripts/build_3.sh
+./scripts/build_3.sh  && sudo reboot
 # please reboot to this new kernel, which is the origin kernel that will show original performance
 # after reboot, then
-./scripts/iou_opt_latency.sh
+cd ${LOCAL_AE_DIR} && ./scripts/iou_opt_latency.sh
 ```
 2.2.3 Aeolia latency
 
 Change kernel to Aeolia Kernel
 ```sh
 # this shell will call a menuconfig, please enable the userinterrupt (UINTR) in the main menu
-./scripts/build_4.sh
+./scripts/build_4.sh && sudo reboot
 # please reboot to this new kernel, which is the origin kernel that will show original performance
 # after reboot, then
+cd $LOCAL_AE_DIR
 ./scripts/build_5.sh
-./scripts/aeolia_latecy.sh
+./scripts/aeolia_latency.sh
 
 ```
 Init the driver submodule, and build it.

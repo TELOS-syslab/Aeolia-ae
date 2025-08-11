@@ -27,7 +27,7 @@ def process_line(line):
     
     # Check if any required metric is 0
     for i in range(len(metrics)):
-        if metrics[i] == 0:
+        if metrics[i] == 0 and i != 6:
             return None
     
     # Calculate time differences
@@ -92,6 +92,7 @@ def main():
                 # Process BREAKDOWN_METRICS data
                 if '[BREAKDOWN_METRICS]' in line:
                     result = process_line(line)
+
                     if result:
                         valid_results.append(result)
                         print(f"Line {line_num}:")
@@ -107,8 +108,8 @@ def main():
                         print(f"  K Overhead Complete: {result['k_overhead_complete']:.2f} ns")
                         print()
                     else:
-                        # print(f"Line {line_num}: Invalid data (contains 0 values), skipped")
-                        # print()
+                        print(f"Line {line_num}: Invalid data (contains 0 values), skipped")
+                        print()
                         pass
                 
                 # Process RECORD DEVICE LATENCY data
@@ -131,6 +132,7 @@ def main():
         return
     
     # Calculate P50 medians for BREAKDOWN_METRICS
+    print(device_latency_values)
     if valid_results:
         num_valid = len(valid_results)
         # print(f"Total valid BREAKDOWN_METRICS lines: {num_valid}")
