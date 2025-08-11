@@ -5,6 +5,7 @@ from plot_common import *
 import subprocess
 import sys
 import tempfile
+import csv
 
 root_dir = os.getcwd()
 
@@ -13,6 +14,56 @@ plot_dir = os.path.join(root_dir, "fig")
 
 csv_name = "data_iou_spdk"
 input_csv = os.path.join(data_dir, csv_name + ".csv")
+
+# Read CSV data for labels
+def read_csv_data(csv_file):
+    data = {}
+    with open(csv_file, 'r') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            category = row['Category']
+            data[category] = {
+                'iou_dfl_flat': float(row['iou_dfl_flat']),
+                'iou_poll_flat': float(row['iou_poll_flat']),
+                'spdk_flat': float(row['spdk_flat']),
+                'iou_dfl': float(row['iou_dfl']),
+                'iou_poll': float(row['iou_poll']),
+                'spdk': float(row['spdk'])
+            }
+    return data
+
+# Generate labels from CSV data
+def generate_labels(csv_data):
+    labels = []
+    
+    # First row: iou_dfl_flat device and processing
+    device_time = csv_data['device']['iou_dfl_flat'] / 1000
+    processing_time = csv_data['processing']['iou_dfl_flat'] / 1000
+    labels.append(f'set label "{device_time:.3f}" at -1.7,2.000 font "Times New Roman,10"')
+    labels.append(f'set label "{processing_time:.3f}" at -1.7,4.200 font "Times New Roman,10"')
+    
+    # Add other iou_dfl_flat labels (keeping original positions for now)
+    labels.append(f'set label "1.126" at -1.7,4.900 font "Times New Roman,10"')
+    labels.append(f'set label "0.648" at -1.7,5.800 font "Times New Roman,10"')
+    labels.append(f'set label "1.789" at -1.7,7.000 font "Times New Roman,10"')
+    labels.append(f'set label "0.188" at -1.7,8.150 font "Times New Roman,10"')
+    
+    # Second row: spdk_flat device and processing
+    spdk_device_time = csv_data['device']['spdk_flat'] / 1000
+    spdk_processing_time = csv_data['processing']['spdk_flat'] / 1000
+    labels.append(f'set label "{spdk_device_time:.3f}" at -0.8,2.000 font "Times New Roman,10"')
+    labels.append(f'set label "{spdk_processing_time:.3f}" at -0.76,4.000 font "Times New Roman,10"')
+    
+    # Total time: iou_dfl others and spdk processing
+    iou_dfl_others = csv_data['others']['iou_dfl'] / 1000
+    spdk_total_processing = csv_data['processing']['spdk'] / 1000
+    labels.append(f'set label "{iou_dfl_others:.1f}" at -2.2,8.500 font "Times New Roman,10"')
+    labels.append(f'set label "{spdk_total_processing:.1f}" at -0.2,4.90 font "Times New Roman,10"')
+    
+    return '\n'.join(labels) + '\n'
+
+# Read CSV data
+csv_data = read_csv_data(input_csv)
 
 env = {
     key: value.format(
@@ -77,26 +128,30 @@ set yrange [0:8.2]
 set ytic 2
 """
 
-plot_script += """
-set label "3.92" at -1.7,2.000 font "Times New Roman,10"
-set label "0.529" at -1.7,4.200 font "Times New Roman,10"
-set label "1.126" at -1.7,4.900 font "Times New Roman,10"
-set label "0.648" at -1.7,5.800 font "Times New Roman,10"
-set label "1.789" at -1.7,7.000 font "Times New Roman,10"
-set label "0.188" at -1.7,8.150 font "Times New Roman,10"
+# plot_script += f"""
+# set label "3.92" at -1.7,2.000 font "Times New Roman,10"
+# set label "0.529" at -1.7,4.200 font "Times New Roman,10"
+# set label "1.126" at -1.7,4.900 font "Times New Roman,10"
+# set label "0.648" at -1.7,5.800 font "Times New Roman,10"
+# set label "1.789" at -1.7,7.000 font "Times New Roman,10"
+# set label "0.188" at -1.7,8.150 font "Times New Roman,10"
 
-set label "3.92" at -0.8,2.000 font "Times New Roman,10"
-set label "0.28" at -0.76,4.000 font "Times New Roman,10"
+# set label "3.92" at -0.8,2.000 font "Times New Roman,10"
+# set label "0.28" at -0.76,4.000 font "Times New Roman,10"
 
-set label "8.2" at -2.2,8.500 font "Times New Roman,10"
-set label "4.2" at -0.2,4.50 font "Times New Roman,10"
-"""
+# set label "8.2" at -2.2,8.500 font "Times New Roman,10"
+# set label "4.2" at -0.2,4.50 font "Times New Roman,10"
+# """
 
 # set label "3.92" at -0.76,2.000 font "Times New Roman,10"
 # set label "0.51" at -0.72,4.200 font "Times New Roman,10"
 # set label "0.637" at -0.8,4.800 font "Times New Roman,10"
 # set label "0.162" at -0.8,5.300 font "Times New Roman,10"
 # set label "5.229" at -0.25,5.500 font "Times New Roman,10"
+# Generate labels from CSV data
+# print(generate_labels(csv_data))
+plot_script += generate_labels(csv_data)
+print("*********************")
 
 ###############################################################################
 
