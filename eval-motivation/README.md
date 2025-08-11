@@ -11,6 +11,7 @@ Since we patched io_uring and fio to simuate and analyze data, you need to chang
 ```sh
 git clone git@github.com:TELOS-syslab/LS.git Aeolia-ae
 cd Aeolia-ae/eval-motivation
+git checkout ae
 export LOCAL_AE_DIR=$(pwd)
 echo "export LOCAL_AE_DIR=$(pwd)" >> ~/.bashrc
 # change bashrc to other profiles you use.

@@ -11,6 +11,7 @@ You need to change kernel during the ae.
 ```sh
 git clone git@github.com:TELOS-syslab/LS.git Aeolia-ae
 cd Aeolia-ae/eval-driver
+git checkout ae
 export LOCAL_AE_DIR=$(pwd)
 echo "LOCAL_AE_DIR=$(pwd)" >> ~/.bashrc
 # change bashrc to other profiles you use.
