@@ -3,7 +3,6 @@
 *.ko
 *.so
 *.so.*
-*.mod*
 *.cmd
 *.swp
 *.log
