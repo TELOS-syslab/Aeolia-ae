@@ -7,5 +7,5 @@ rw=randread
 cpus_allowed=92
 filename=/dev/nvme0n1
 bs=4k
-size=80k
+size=400k
 numjobs=1

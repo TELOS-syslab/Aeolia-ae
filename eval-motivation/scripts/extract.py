@@ -88,7 +88,8 @@ def main():
         with open(input_file, 'r') as f:
             for line_num, line in enumerate(f, 1):
                 line = line.strip()
-                
+                if line_num < 50:
+                    continue
                 # Process BREAKDOWN_METRICS data
                 if '[BREAKDOWN_METRICS]' in line:
                     result = process_line(line)
