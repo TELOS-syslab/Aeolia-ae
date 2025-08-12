@@ -5,7 +5,7 @@ iosizes = ["4K"]
 num_threads = ["1", "2", "4", "8", "12"]
 num_tasks = 1
 tsk_set = task_set()
-cpus_allowed = f"{tsk_set["start"]}-{tsk_set["start"]+3}"
+cpus_allowed = f"{tsk_set['start']}-{tsk_set['start']+3}"
 
 def main(baseline: bool = False):
     if baseline:

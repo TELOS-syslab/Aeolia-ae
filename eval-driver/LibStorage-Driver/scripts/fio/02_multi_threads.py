@@ -1,7 +1,7 @@
 from .common import *
 
 iosizes = ["4K"]
-num_threads = ["1", "2", "4", "8", "16", "32", "63"]
+num_threads = ["1", "2", "4", "8", "16", "32"]
 num_tasks = 1
 tsk_set = task_set()
 cpus_allowed = "64-127"

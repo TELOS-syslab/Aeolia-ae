@@ -69,9 +69,6 @@ def task_set():
         "end": cpu_end,
     }
 
-
-tsk_start = task_set()["start"]
-
 base_bg_command = """
 nice -n 0 taskset -c {cpus_allowed} {root_dir}/swaptions \
     -ns 10000 -sm {simuls} -nt 1 -sd 0
@@ -143,7 +140,7 @@ def run_fio_tests(
             nice=-1,
         )
 
-        if other_tests != "":
+        if other_tests != [""]:
             for test in other_tests:
                 config_content += test
                 if aeolia in engine:
@@ -155,8 +152,9 @@ def run_fio_tests(
         with tempfile.NamedTemporaryFile(mode="w+", suffix=".fio") as f:
             f.write(config_content)
             f.flush()
+
             print(config_content)
-            fio_command = f"fio {f.name} {fio_options.format(log_file=result_file)}"
+            fio_command = f"{root_dir}/../fio/fio {f.name} {fio_options.format(log_file=result_file)}"
             for k, v in envs.items():
                 fio_command = f"{k}={v} " + fio_command
 
@@ -209,9 +207,6 @@ def run_corun_with_comp_tests(
         "sys_time",
     ]
 
-    if aeolia in engine and cpus_allowed != task_set()["start"]:
-        cpus_allowed = f"{tsk_start + 1}-{tsk_start+3}"
-
     for iotype, iodepth, iosize, numjobs in it.product(
         iotypes, iodepths, iosizes, num_threads
     ):
@@ -236,7 +231,7 @@ def run_corun_with_comp_tests(
             f.write(config_content)
             f.flush()
 
-            fio_command = f"fio {f.name} {fio_options.format(log_file=result_file)}"
+            fio_command = f"{root_dir}/../fio/fio {f.name} {fio_options.format(log_file=result_file)}"
             for k, v in envs.items():
                 fio_command = f"{k}={v} " + fio_command
 
@@ -246,12 +241,10 @@ def run_corun_with_comp_tests(
                 simuls = 200
 
             bg_command = base_bg_command.format(
-                cpus_allowed=tsk_start,
+                cpus_allowed=cpus_allowed,
                 root_dir=root_dir,
                 simuls=simuls,
             )
-
-            print(f"{fio_command}\n{bg_command}")
 
             pbar.set_description(
                 f"Running {engine}: iotype={iotype} iodepth={iodepth} iosize={iosize} numjobs={numjobs}"
@@ -343,7 +336,7 @@ def run_corun_with_comp_tests(
                 fio_command = f"{k}={v} " + fio_command
 
             bg_command = base_bg_command.format(
-                cpus_allowed=tsk_start,
+                cpus_allowed=cpus_allowed,
                 root_dir=root_dir,
                 simuls=10000,
             )

@@ -16,14 +16,6 @@ eval_mapping = {
     4: ["05_corun_io_io_single_core", "06_corun_io_io_4_cores"],
 }
 
-plot_mapping = {
-    1: ["fig10"],
-    2: ["fig11"],
-    3: ["fig12"],
-    4: ["fig13"],
-    5: ["fig6"],
-}
-
 
 def run_eval(eval_name, baseline):
     setup_script = os.path.join(root_dir, "scripts", "setup.sh")
