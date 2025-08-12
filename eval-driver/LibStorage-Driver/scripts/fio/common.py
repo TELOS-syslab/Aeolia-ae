@@ -235,10 +235,7 @@ def run_corun_with_comp_tests(
             for k, v in envs.items():
                 fio_command = f"{k}={v} " + fio_command
 
-            if spdk in engine:
-                simuls = 20
-            else:
-                simuls = 200
+            simuls = 200
 
             bg_command = base_bg_command.format(
                 cpus_allowed=cpus_allowed,
@@ -288,12 +285,10 @@ def run_corun_with_comp_tests(
             print(f"Swaption done {end - start}")
             # atexit.unregister(collect_stats)
 
-            fg.wait()
+            for child in psutil.Process(fg.pid).children():
+                child.terminate()
 
             total_wall_time = end - start
-
-            if spdk in engine:
-                total_wall_time *= 10
 
             user_time = cpu_times.user
             sys_time = cpu_times.system
@@ -331,7 +326,7 @@ def run_corun_with_comp_tests(
             f.write(config_content)
             f.flush()
 
-            fio_command = f"fio {f.name} {fio_options.format(log_file=result_file)}"
+            fio_command = f"{root_dir}/../fio/fio {f.name} {fio_options.format(log_file=result_file)}"
             for k, v in envs.items():
                 fio_command = f"{k}={v} " + fio_command
 

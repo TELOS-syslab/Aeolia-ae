@@ -40,7 +40,8 @@ trans_csv(input_csv, output_csv, params, metrics)
 
 # For io-io
 iosizes_param = Param("iosize", ["4K"])
-csv_name = "05_corun_io_io_single_core"
+num_threads_param = Param("numjobs", ["2"])
+csv_name = "02_multi_threads_single_core"
 input_csv = os.path.join(data_dir, csv_name + ".csv")
 output_csv = os.path.join(data_dir, f"tmp_" + csv_name + "io_io.csv")
 data_files.append(output_csv)
@@ -116,8 +117,8 @@ set xrange [-5:5]
 set ylabel "Throughput (GB/s)"
 set y2label "Batch kops per second"
 set y2label font "Times New Roman,12" offset -2,0
-set yrange [0:]
-set y2range [0:]
+set yrange [0:4]
+set y2range [0:3]
 set ytic 1
 set y2tic 0.75
 """
@@ -173,6 +174,7 @@ set y2label "P99.9 Latency (us)"
 set key at -3.8,1.2 maxrows 1
 set xtics add ('' -5, '' -4, '' -3, '' -2, '' -1, '' 0, '' 1, '' 2, '' 3, '' 4, '' 5)
 set ytic 0.25
+set yrange [0:1]
 set y2tic 10
 set y2range [0:40.2]
 set y2tics add ('3000' 30, '4000' 40)
@@ -185,14 +187,14 @@ set arrow from 4.86,0.651 to 5.14,0.675 nohead lc rgb "black" lw 0.5 front
 plot_script += f'plot "{data_files[1]}" \\'
 base = baselines[0]
 plot_script += base_y1_bar_notitle.format(
-    row=base.id,
+    row=base.id + len(baselines),
     entry=f"{bar_shift(base.id - id_start, nr_drv_base, left_base, off, True)}:($2 / 1000)",
     color=base.color,
     pattern=base.pattern,
 )
 for base in baselines[1:3]:
     curve = base_y1_bar_notitle.format(
-        row=base.id,
+        row=base.id + len(baselines),
         entry=f"{bar_shift(base.id - id_start, nr_drv_base, left_base, off, True)}:($2 / 1000)",
         color=base.color,
         pattern=base.pattern,
@@ -200,7 +202,7 @@ for base in baselines[1:3]:
     plot_script += "'' \\" + curve
 for base in baselines[3:]:
     curve = base_y1_bar.format(
-        row=base.id,
+        row=base.id + len(baselines),
         entry=f"{bar_shift(base.id - id_start, nr_drv_base, left_base, off, True)}:($2 / 1000)",
         color=base.color,
         pattern=base.pattern,
@@ -209,7 +211,7 @@ for base in baselines[3:]:
     plot_script += "'' \\" + curve
 for base in baselines:
     curve = base_y2_bar.format(
-        row=base.id + len(baselines),
+        row=base.id,
         entry=f"{bar_shift(base.id - id_start, nr_drv_base, right_base, off, False)}:({map_to_interval(2, 3000, 4000, 0.03, 0.04)} * 1000)",
         color=base.color,
         pattern=base.pattern,
@@ -228,5 +230,5 @@ with tempfile.NamedTemporaryFile(mode="w+", suffix=".gp") as f:
     f.flush()
     subprocess.run(["gnuplot", f.name], env=env)
 
-for data_file in data_files:
-    os.remove(data_file)
+# for data_file in data_files:
+#     os.remove(data_file)

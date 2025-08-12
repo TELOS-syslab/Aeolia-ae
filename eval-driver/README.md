@@ -36,7 +36,7 @@ bash ./scripts/build_1.sh && sudo reboot
 
 # after reboot, then
 
-bash ./scripts/eval-aeolia.sh    # this evaluation will take around 1.5 hours
+bash ./scripts/eval-baseline.sh    # this evaluation will take around 1.5 hours
 ```
 
 1.2.2 Aeolia

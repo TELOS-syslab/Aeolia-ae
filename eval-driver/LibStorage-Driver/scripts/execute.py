@@ -11,7 +11,7 @@ if root_dir == "":
 
 eval_mapping = {
     1: ["01_single_thread"],
-    2: ["02_multi_threads"],
+    2: ["02_multi_threads_single_core", "02_multi_threads"],
     3: ["03_corun_io_comp_single_core", "04_corun_io_comp_4_cores"],
     4: ["05_corun_io_io_single_core", "06_corun_io_io_4_cores"],
 }
@@ -38,9 +38,9 @@ def run_eval(eval_name, baseline):
 def list_evals():
     message = """Available evaluations:
 1: single thread           (Figure 10)
-2: multiple threads        (Figure 11)
+2: multiple threads        (Figure 6.2, 11)
 3: I/O & computation       (Figure 6.1, 12)
-4: latency & throughput    (Figure 6.2, 13)"""
+4: latency & throughput    (Figure 13)"""
 
     print(message)
 
