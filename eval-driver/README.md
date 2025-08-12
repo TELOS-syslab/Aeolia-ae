@@ -43,6 +43,7 @@ bash ./scripts/eval-baseline.sh    # this evaluation will take around 1.5 hours
 
 Change kernel to Aeolia Kernel
 ```sh
+# this shell will call a menuconfig, please enable the userinterrupt (UINTR) in the main menu, and SCHED_CLASS_EXT (location: General setup -> Extensible Scheduling Class)
 bash ./scripts/build_2.sh && sudo reboot
 
 # after reboot, then
