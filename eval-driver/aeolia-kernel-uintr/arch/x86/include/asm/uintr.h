@@ -17,7 +17,7 @@ struct uintr_upid {
 		u8 reserved2; /* Reserved */
 		u32 ndst; /* Notification destination */
 	} nc __packed; /* Notification control */
-	u64 puir; /* Posted user interrupt requests */
+	volatile u64 puir; /* Posted user interrupt requests */
 } __aligned(64);
 /* UPID Notification control status bits */
 #define UINTR_UPID_STATUS_ON 0x0 /* Outstanding notification */

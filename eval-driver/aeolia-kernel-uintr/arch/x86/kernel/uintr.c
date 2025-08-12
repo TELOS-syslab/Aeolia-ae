@@ -22,6 +22,8 @@ struct uintr_upid *upid_page;
 EXPORT_SYMBOL(upid_page);
 pid_t uintr_pid = 12345;
 EXPORT_SYMBOL(uintr_pid);
+int uintr_debug = 0;
+EXPORT_SYMBOL(uintr_debug);
 static atomic_t upid_alloc_cnt = ATOMIC_INIT(0);
 static inline u32 cpu_to_ndst(int cpu)
 {
@@ -39,7 +41,6 @@ static struct uintr_upid *alloc_upid(void)
 	if (!upid_page)
 		return NULL;
 	int upid_idx = atomic_inc_return(&upid_alloc_cnt);
-	upid_idx--;
 	pr_info("[alloc_upid]: page %p, cnt %d, upid : %p\n", upid_page,
 		upid_idx, upid_page + upid_idx);
 	return upid_page + upid_idx;
@@ -82,6 +83,8 @@ int do_uintr_register_handler(u64 handler, u8 uinv)
 	upid = upid_ctx->upid;
 	pr_info("cpu : %d, uinv : %d, upid : %p\n", smp_processor_id(), uinv,
 		upid);
+	current->thread.waiting_uintr = 0;
+	current->thread.uintr_vec = uinv;
 	upid->nc.nv = uinv;
 	upid->nc.ndst = cpu_to_ndst(smp_processor_id());
 	g_vis_uinv = uinv;
@@ -113,33 +116,47 @@ EXPORT_SYMBOL(do_uintr_register_irq_handler);
 
 void switch_uintr_return(void)
 {
-	u64 misc_msr, uirr;
-	if (!current->thread.upid_activated)
+	u64 misc_msr, uirr, puir;
+	if (!!!current->thread.upid_activated)
 		return;
 	WARN_ON_ONCE(test_thread_flag(TIF_NEED_FPU_LOAD));
+	// pr_info("pid : %d, current : %p, upid_ctx : %p, upid : %p\n",
+	// 	current->pid, current, current->thread.upid_ctx, upid);
 	/* Modify only the relevant bits of the MISC MSR */
 	// CAN: rd is for not change other bits, but now, other bits are not used
 	rdmsrl(MSR_IA32_UINTR_MISC, misc_msr);
 	if (!(misc_msr & GENMASK_ULL(39, 32))) {
-		misc_msr |= (u64)current->thread.upid_ctx->upid->nc.nv << 32;
+		misc_msr |= (u64)current->thread.uintr_vec << 32;
 		wrmsrl(MSR_IA32_UINTR_MISC, misc_msr);
 	}
-	if (READ_ONCE(current->thread.waiting_uintr)) {
+	if (current->thread.waiting_uintr) {
 		// pr_info("Kernel UINTR Detected\n");
-		WRITE_ONCE(current->thread.waiting_uintr, 0);
+		// if (!current->thread.upid_ctx ||
+		//     !current->thread.upid_ctx->upid) {
+		// 	pr_err("upid_ctx is NULL\n");
+		// 	return;
+		// }
+		current->thread.waiting_uintr = 0;
 		// wrmsrl(MSR_IA32_UINTR_RR, 2);
-		WRITE_ONCE(current->thread.upid_ctx->upid->puir, 4);
-		smp_mb();
-		apic->send_IPI_self((u64)current->thread.upid_ctx->upid->nc.nv);
+		// WRITE_ONCE(current->thread.upid_ctx->upid->puir, 4);
+		apic->send_IPI_self(current->thread.uintr_vec);
 		// pr_info("Sending SELF IPI\n");
 	}
-	rdmsrl_safe(MSR_IA32_UINTR_RR, &uirr);
-	// pr_info("cpu %d, uirr %llx, upid->pir : %llx\n", smp_processor_id(), uirr, current->thread.upid_ctx->upid->puir);
+	if (uintr_debug) {
+		rdmsrl_safe(MSR_IA32_UINTR_RR, &uirr);
+		rdmsrl(MSR_IA32_UINTR_MISC, misc_msr);
+		pr_info("get puir %lx, uirr %lx, misc %lx", puir, uirr,
+			misc_msr);
+		pr_info("cpu %d, uirr %llx, upid->pir : %llx\n",
+			smp_processor_id(), uirr,
+			current->thread.upid_ctx->upid->puir);
+	}
 }
 
 struct uintr_upid *init_upid_mem(void)
 {
-	upid_page = (struct uintr_upid *)get_zeroed_page(GFP_KERNEL);
+	upid_page = (struct uintr_upid *)__get_free_pages(
+		GFP_KERNEL | __GFP_ZERO, 9);
 	pr_info("upid_page : %p\n", upid_page);
 	atomic_set(&upid_alloc_cnt, 0);
 	if (!upid_page)
@@ -151,7 +168,7 @@ EXPORT_SYMBOL(init_upid_mem);
 void free_upid_mem(void)
 {
 	if (upid_page)
-		free_page((unsigned long)upid_page);
+		free_pages((unsigned long)upid_page, 9);
 	upid_page = NULL;
 }
 EXPORT_SYMBOL(free_upid_mem);

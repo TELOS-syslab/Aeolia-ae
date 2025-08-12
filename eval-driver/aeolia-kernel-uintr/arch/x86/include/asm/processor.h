@@ -502,7 +502,8 @@ struct thread_struct {
 	struct thread_shstk shstk;
 #endif
 	struct uintr_upid_ctx *upid_ctx;
-	unsigned int waiting_uintr;
+	volatile unsigned int waiting_uintr;
+	u8 uintr_vec;
 
 	unsigned int upid_activated;
 	struct {

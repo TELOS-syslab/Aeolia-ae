@@ -586,7 +586,7 @@ int fpu_clone(struct task_struct *dst, unsigned long clone_flags, bool minimal,
 {
 	struct fpu *src_fpu = &current->thread.fpu;
 	struct fpu *dst_fpu = &dst->thread.fpu;
-
+	struct uintr_state *uintr_state;
 	/* The new task's FPU state cannot be valid in the hardware. */
 	dst_fpu->last_cpu = -1;
 
@@ -635,6 +635,12 @@ int fpu_clone(struct task_struct *dst, unsigned long clone_flags, bool minimal,
 	if (!(clone_flags & CLONE_THREAD))
 		fpu_inherit_perms(dst_fpu);
 
+	if (cpu_feature_enabled(X86_FEATURE_UINTR)) {
+		uintr_state = get_xsave_addr(&dst_fpu->fpstate->regs.xsave,
+					     XFEATURE_UINTR);
+		if (uintr_state)
+			memset(uintr_state, 0, sizeof(*uintr_state));
+	}
 	/*
 	 * Children never inherit PASID state.
 	 * Force it to have its init value:
