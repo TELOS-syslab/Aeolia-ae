@@ -11,7 +11,7 @@ make -j$(nproc)
 
 cd ${LOCAL_AE_DIR}/aeolia-kernel-orig_6.12
 cp /boot/config-$(uname -r) ./.config
-make olddefconfig
-make -j$(nproc)
+sudo make olddefconfig
+sudo make -j$(nproc)
 sudo make modules_install -j$(nproc)
 sudo make install
