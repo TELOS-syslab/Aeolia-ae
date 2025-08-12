@@ -26,7 +26,7 @@ cd ${LOCAL_AE_DIR}/fio
 ./configure
 make -j$(nproc)
 
-cd ${LOCAL_AE_DIR}/spdk
+cd ${LOCAL_AE_DIR}/LibStorage-Driver/spdk
 sudo ./scripts/pkgdep.sh
 ./configure --with-fio=${LOCAL_AE_DIR}/fio
 make -j$(nproc)
