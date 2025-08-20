@@ -27,7 +27,7 @@ set $dir=/sufs
 set $nfiles=50000
 set $meandirwidth=1000000
 set $meanfilesize=512k
-set $nthreads=4
+set $nthreads=64
 set $meaniosize=16k
 set $iosize=1m
 
@@ -61,4 +61,4 @@ define process name=proxycache,instances=1
 }
 
 echo  "Web proxy-server Version 3.0 personality successfully loaded"
-run 5
+run 2

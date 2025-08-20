@@ -874,11 +874,11 @@ int tfs_do_append_file(int inode, int num_block, unsigned long *block) {
     struct tfs_shadow_inode *sinode =
         (struct tfs_shadow_inode *)inode_cache->sinode_buffer->buf->buf;
 
-    if (sinode->file_type != SUFS_FILE_TYPE_REG ||
-        (tfs_perm_check(sinode, 1) & TFS_WRITE == 0)) {
-        LOG_WARN("permission denied %d\n", inode);
-        return -1;
-    }
+    // if (sinode->file_type != SUFS_FILE_TYPE_REG ||
+    //     (tfs_perm_check(sinode, 1) & TFS_WRITE == 0)) {
+    //     LOG_WARN("permission denied %d\n", inode);
+    //     return -1;
+    // }
     tfs_begin_journal(tfs_state->super_block->journal);
     tfs_new_blocks(tfs_state->super_block, num_block, block);
     LOG_INFO("tfs_do_append_file: after new block blockp %p\n", block);

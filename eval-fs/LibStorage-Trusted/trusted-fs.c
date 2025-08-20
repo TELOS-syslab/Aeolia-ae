@@ -66,7 +66,7 @@ static void tfs_init_states(void) {
     tfs_state->super_block =
         (struct tfs_super_block *)malloc(sizeof(struct tfs_super_block));
     
-    for (i=0; i<64; i++){
+    for (i=0; i<65; i++){
         tfs_init_tls(i);
     }
 }
