@@ -106,7 +106,7 @@ main() {
     mkdir -p temp
     sudo rm -f data/filebench_*.log
     make_filebench
-    # evaluate_aeolia
+    evaluate_aeolia
     
     evaluate_ext4
     
