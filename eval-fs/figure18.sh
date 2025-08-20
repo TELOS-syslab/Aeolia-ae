@@ -57,7 +57,7 @@ evaluate_aeolia() {
             initialize_aeolia
             sed -e "s/^set \$nthreads=.*/set \$nthreads=$nthread/" -e "s|^set \$dir=.*|set \$dir=/sufs|" ./filebench/workloads/$test.f > ./filebench/workloads/${test}_tmp.f
             echo "aeolia ${nthread} " >> data/filebench_${test}.log
-            sudo filebench-sufs -f ./filebench/workloads/${test}_tmp.f | grep "IO Summary" >> data/filebench_${test}.log
+            sudo taskset -c 0-63 filebench-sufs -f ./filebench/workloads/${test}_tmp.f | grep "IO Summary" >> data/filebench_${test}.log
         done
     done
 }
@@ -74,7 +74,7 @@ evaluate_ext4() {
             initialize_ext4
             sed -e "s/^set \$nthreads=.*/set \$nthreads=$nthread/" -e "s|^set \$dir=.*|set \$dir=/mnt/eval_ext4|" ./filebench/workloads/$test.f > ./filebench/workloads/${test}_tmp.f
             echo "ext4 ${nthread} " >> data/filebench_${test}.log
-            sudo filebench -f ./filebench/workloads/${test}_tmp.f | grep "IO Summary" >> data/filebench_${test}.log
+            sudo taskset -c 0-63 filebench -f ./filebench/workloads/${test}_tmp.f | grep "IO Summary" >> data/filebench_${test}.log
         done
     done
 }
@@ -92,7 +92,7 @@ evaluate_f2fs() {
             initialize_f2fs
             sed -e "s/^set \$nthreads=.*/set \$nthreads=$nthread/" -e "s|^set \$dir=.*|set \$dir=/mnt/eval_f2fs|" ./filebench/workloads/$test.f > ./filebench/workloads/${test}_tmp.f
             echo "f2fs ${nthread} " >> data/filebench_${test}.log
-            sudo filebench -f ./filebench/workloads/${test}_tmp.f | grep "IO Summary" >> data/filebench_${test}.log
+            sudo taskset -c 0-63 filebench -f ./filebench/workloads/${test}_tmp.f | grep "IO Summary" >> data/filebench_${test}.log
         done
     done
     echo "Completed f2fs test: $test"
