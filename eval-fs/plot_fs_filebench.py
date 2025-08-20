@@ -86,7 +86,7 @@ plot_script += base_line_curve.format(
     pt=base.point_t,
     title=base.title,
 )
-for base in baselines[1:2]:
+for base in baselines[1:]:
     curve = base_line_curve.format(
         entry=f"{div_1000(base.id)}",
         color=base.color,
@@ -94,14 +94,14 @@ for base in baselines[1:2]:
         title=base.title,
     )
     plot_script += "'' skip 1 \\" + curve
-for base in baselines[3:]:
-    curve = base_line_curve.format(
-        entry=f"{div_1000(base.id)}",
-        color=base.color,
-        pt=base.point_t,
-        title=base.title,
-    )
-    plot_script += "'' skip 1 \\" + curve
+# for base in baselines[3:]:
+#     curve = base_line_curve.format(
+#         entry=f"{div_1000(base.id)}",
+#         color=base.color,
+#         pt=base.point_t,
+#         title=base.title,
+#     )
+#     plot_script += "'' skip 1 \\" + curve
 
 ###############################################################################
 # Second subplot

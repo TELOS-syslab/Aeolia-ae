@@ -55,5 +55,5 @@ sudo python3 clean_data.py
 sudo python3 plot_fs_single_thread.py # figure 14
 sudo python3 plot_fs_multi_threads.py # figure 15
 sudo python3 plot_fs_fxmark.py # figure 16
-sudo python3 plot_fs_filebench # figure 18
+sudo python3 plot_fs_filebench.py # figure 18
 ```

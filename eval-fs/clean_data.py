@@ -323,7 +323,8 @@ def process_filebench_data(input_file, output_file):
                     if len(parts) >= 2:
                         fs = parts[0]
                         threads = int(parts[1])
-                        
+                        nxt = 2
+
                         # Read next line for IO Summary
                         if i + 1 < len(lines):
                             next_line = lines[i + 1].strip()
@@ -341,7 +342,9 @@ def process_filebench_data(input_file, output_file):
                                         all_data[threads][fs] = ops_value
                                     except ValueError:
                                         pass
-                        i += 2  # Skip both lines
+                            else:
+                                nxt = 1
+                        i += nxt  # Skip both lines
                     else:
                         i += 1
                 else:
@@ -367,8 +370,8 @@ def process_filebench_data(input_file, output_file):
     print(f"Processed {input_file} -> {output_file}")
 
 if __name__ == "__main__":
-    # figure14()
-    # figure15()
+    figure14()
+    figure15()
     figure16()
-    # table7()
+    table7()
     figure18()
